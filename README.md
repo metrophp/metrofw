@@ -1,5 +1,3 @@
 Metro Framework
 ===
-Collection of classes to work with nofw.
-
-
+Libraries for nofw micro framework.
