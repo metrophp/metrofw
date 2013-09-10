@@ -182,15 +182,28 @@ class Metrofw_Request {
 	public function cleanInt($name) {
 		if (isset($this->getvars[$name])){
 			if (is_array($this->getvars[$name])){
-				return Cgn::cleanIntArray($this->getvars[$name]);
+				return Metrofw_Request::cleanIntArray($this->getvars[$name]);
 			}
 			return intval($this->getvars[$name]);
 		} else {
 			if (@is_array($this->postvars[$name])){
-				return Cgn::cleanIntArray($this->postvars[$name]);
+				return Metrofw_Request::cleanIntArray($this->postvars[$name]);
 			}
 			return intval(@$this->postvars[$name]);
 		}
+	}
+
+	/**
+	 * Clean a multi-dimensional array of ints
+	 */
+	static public function cleanIntArray($input, $loop=0) {
+		if ($loop > 100) return (int)$input;
+		if (!is_array($input)) return (int)$input;
+		$output = array();
+		foreach ($input as $k=>$v) {
+			$output[$k] = self::cleanIntArray($input, $loop++);
+		}
+		return $output;
 	}
 
 	/**
@@ -203,16 +216,55 @@ class Metrofw_Request {
 	public function cleanFloat($name) {
 		if (isset($this->getvars[$name])){
 			if (is_array($this->getvars[$name])){
-				return Cgn::cleanFloatArray($this->getvars[$name]);
+				return Metrofw_Request::cleanFloatArray($this->getvars[$name]);
 			}
 			return floatval($this->getvars[$name]);
 		} else {
 			if (@is_array($this->postvars[$name])){
-				return Cgn::cleanFloatArray($this->postvars[$name]);
+				return Metrofw_Request::cleanFloatArray($this->postvars[$name]);
 			}
 			return floatval(@$this->postvars[$name]);
 		}
 	}
+
+	/**
+	 * Clean a multi-dimensional array of floats
+	 */
+	static public function cleanFloatArray($input, $loop=0) {
+		if ($loop > 100) return floatval($input);
+		if (!is_array($input)) return floatval($input);
+		$output = array();
+		foreach ($input as $k=>$v) {
+			$output[$k] = self::cleanFloatArray($input, $loop++);
+		}
+		return $output;
+	}
+
+	/**
+	 * This method cleans a boolean from the GET or POST. 
+	 * It always returns the result of (bool)
+	 * Order of preference is GET then POST
+	 *
+	 * @return float
+	 */
+	public function cleanBool($name) {
+		if (isset($this->getvars[$name])){
+/*
+			if (is_array($this->getvars[$name])){
+				return Metrofw_Request::cleanBoolArray($this->getvars[$name]);
+			}
+*/
+			return (bool)$this->getvars[$name];
+		} else {
+/*
+			if (@is_array($this->postvars[$name])){
+				return Metrofw_Request::cleanBoolArray($this->postvars[$name]);
+			}
+*/
+			return (bool)@$this->postvars[$name];
+		}
+	}
+
 
 	/**
 	 * This method cleans a string from the GET or POST, removing any HTML tags. 
