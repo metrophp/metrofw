@@ -79,7 +79,9 @@ class Metrofw_Analyze_sapi_http {
 			$request->isAjax = TRUE;
 			//if there's no JSON in ://input, then there's no postvars by definition
 			// just quiet this annoying 'not an array' message
-			$request->postvars = @array_merge($request->postvars, json_decode(file_get_contents('php://input'), TRUE ));
+			$jsonvars = @array_merge($request->postvars, json_decode(file_get_contents('php://input'), TRUE ));
+			if (is_array($jsonvars))
+			$request->postvars = @array_merge($request->postvars, $jsonvars);
 		} else {
 			$request->isAjax = FALSE;
 		}
