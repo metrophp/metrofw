@@ -33,7 +33,18 @@ class Metrofw_Output {
 	}
 
 	public function statusHeader($res) {
+
+		//if no statusCode, set to 200
+		$code = $res->get('statusCode');
+		if (empty($code)) {
+			$res->set('statusCode', 200);
+		}
 		switch ($res->get('statusCode')) {
+
+			case 400:
+			header('HTTP/1.1 400 Bad Request');
+			break;
+
 			case 401:
 			header('HTTP/1.1 401 Unauthorized');
 			break;
@@ -47,9 +58,13 @@ class Metrofw_Output {
 			header('HTTP/1.1 501 Server Error');
 			break;
 
-			default:
+			case 200:
 			header('HTTP/1.1 200 OK');
 			break;
-		} 
+
+			default:
+			header('HTTP/1.1 '.$res->get('statusCode'));
+			break;
+		}
 	}
 }
