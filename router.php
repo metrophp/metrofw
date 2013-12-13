@@ -71,9 +71,40 @@ class Metrofw_Router {
 		}
 
 		$url = $request->requestedUrl;
+		//remove initial /
+		$listUrl = explode('/', $url);
+		array_shift($listUrl);
+		//remove trailing slash
+		if (empty($listUrl [ (count($listUrl)-1) ])) {
+			array_pop($listUrl);
+		}
 
 		$rules = associate_get('route_rules');
 		if ($rules) {
+
+			foreach ($rules as $pattern => $params) {
+				$listPat = explode('/', $pattern);
+				//remove initial /
+				array_shift($listPat);
+
+				//if pattern is longer, forget it
+				if (count($listPat) > count($listUrl)) continue;
+
+				foreach ($listPat as $_kPat => $_vPat) {
+					if ( substr($_vPat, 0, 1) === ':' ) {
+						$params[ substr($_vPat, 1) ] = $listUrl[$_kPat];
+					} else {
+						//ensure the pattern matches the url exactly
+						if ($listPat[ $_kPat ] != $listUrl[ $_kUrl ]) continue 2;
+					}
+				}
+				foreach ($params as $_i => $_j) {
+					$request->set($_i, $_j);
+				}
+				associate_iCanHandle('process',  $request->appName.'/'.$request->modName.'.php::'.$request->actName.'Action');
+				return;
+			}
+/*
 			foreach ($rules as $pattern => $route ) {
 				$matches = array();
 				preg_match($pattern, $url, $matches);
@@ -87,6 +118,7 @@ class Metrofw_Router {
 					return;
 				}
 			}
+*/
 		}
 
 		$parts = explode('/', $url);
