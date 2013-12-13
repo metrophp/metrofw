@@ -1,10 +1,6 @@
-Metro Framework
-===
-Libraries for nofw micro framework.
 
-Sample Configuration
-=====
-```php
+//append to or merge this with to your etc/bootstrap.php
+
 associate_iCanHandle('analyze',  'metrofw/analyzer.php');
 associate_iCanHandle('analyze',  'metrofw/router.php');
 associate_iCanHandle('resources', 'metrofw/utils.php');
@@ -34,4 +30,3 @@ associate_set('route_rules',
 associate_set('route_rules', 
 	array_merge(array('/:appName/:modName/:actName/:arg'=>array(  )),
 	associate_get('route_rules')));
-```
