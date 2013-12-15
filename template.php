@@ -210,6 +210,9 @@ class Metrofw_Template {
 			count($associate->serviceList[$section]) > 0);
 	}
 
+	static public function onException($req, $res) {
+		echo _get('last_exception')->getMessage();
+	}
 }
 
 function sitename() {
