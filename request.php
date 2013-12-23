@@ -76,7 +76,11 @@ class Metrofw_Request {
 	 * removes effects of Magic Quotes GPC
 	 */
 	public function stripMagic() {
-		@set_magic_quotes_runtime(0);
+		//runtime magic quotes are quite rare, and even
+		// turning them off results in an error above PHP 5.3.0
+		if (version_compare(phpversion(), '5.3.0', '<')) {
+			@set_magic_quotes_runtime(0);
+		}
 		// if magic_quotes_gpc strip slashes from GET POST COOKIE
 		if (get_magic_quotes_gpc()){
 		function stripslashes_array($array) {
