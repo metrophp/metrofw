@@ -95,12 +95,14 @@ class Metrofw_Router {
 						$params[ substr($_vPat, 1) ] = $listUrl[$_kPat];
 					} else {
 						//ensure the pattern matches the url exactly
-						if ($listPat[ $_kPat ] != $listUrl[ $_kUrl ]) continue 2;
+						if ($listPat[ $_kPat ] != $listUrl[ $_kPat ]) continue 2;
 					}
 				}
 				foreach ($params as $_i => $_j) {
 					$request->set($_i, $_j);
 				}
+
+				$request->isRouted = TRUE;
 				associate_iCanHandle('process',  $request->appName.'/'.$request->modName.'.php::'.$request->actName.'Action');
 				return;
 			}
