@@ -49,10 +49,6 @@ class Metrofw_Template {
 
 		associate_set('baseuri', $request->baseUri);
 
-		if (isset($request->sparkMsg) ) {
-			associate_iCanHandle('template.sparkmsg', 'metrofw/sparkmsg.php', 1);
-		}
-
 		associate_iCanHandle('template.toplogin', 'metrofw/toplogin.php');
 		$this->parseTemplate($layout);
 	}
@@ -94,7 +90,7 @@ class Metrofw_Template {
 	 * else, see if there is a template file.
 	 */
 	public function template($request, $section) {
-		$response = &associate_getMeA('response');
+		$response = associate_getMeA('response');
 		$sect = str_replace('template.', '', $section);
 
 		if ($response->has($sect)) {
@@ -110,6 +106,8 @@ class Metrofw_Template {
 			}
 		}
 		//we don't have a section in the response
+		//let's include the template.main.file if the section is "main".
+		if ($sect != 'main') return;
 		$filesep = '/';
 		$subsection = substr($section, strpos($section, '.')+1);
 		$viewFile = associate_get('template.main.file', $request->modName.'_'.$request->actName).'.html.php';
