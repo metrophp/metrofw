@@ -4,12 +4,28 @@ class Metrofw_Output {
 
 	/**
 	 * Set the HTTP status first, in case output buffering is not on.
+	 *
+	 * save sparkmsg to session if redirecting
+	 * load sparkmsg from session if not redirecting
 	 */
 	public function output($req, $res) {
 		$this->statusHeader($res);
+		$sess = _getMeA('session');
 		if (isset($res->redir)) {
+			$msg  = $res->get('sparkMsg');
+			$sess->set('sparkMsg', $msg);
+
 			$this->redir($res);
 			return;
+		}
+
+
+		$msg  = $sess->get('sparkMsg');
+		if (!empty($msg)) {
+			foreach ($msg as $_m) {
+				$res->addTo('sparkMsg', $_m);
+			}
+			$sess->clear('sparkMsg');
 		}
 
 		if ($req->isAjax) {
@@ -20,6 +36,9 @@ class Metrofw_Output {
 		}
 	}
 
+	/**
+	 * Redirect user
+	 */
 	public function redir($res) {
 //		echo 'You will be redirected here: <a href="'.$request->redir.'">'.$request->redir.'</a>';
 		header('Location: '.$res->redir);
