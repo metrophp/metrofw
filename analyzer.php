@@ -20,6 +20,7 @@ class Metrofw_Analyzer {
 			break;
 
 			case "cgi-fcgi":
+			case "fpm-fcgi":
 			case "cgi":
 				associate_iCanHandle('analyze', 'metrofw/analyze_sapi_cgi.php');
 			break;
