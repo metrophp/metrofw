@@ -78,10 +78,15 @@ class Metrofw_Router {
 		if (empty($listUrl [ (count($listUrl)-1) ])) {
 			array_pop($listUrl);
 		}
+		//remove /id=X/ from  URL
+		foreach ($listUrl as $_key => $_url) {
+			if (strpos($_url, '=') !== FALSE ) {
+				unset($listUrl[$_key]);
+			}
+		}
 
 		$rules = associate_get('route_rules');
 		if ($rules) {
-
 			foreach ($rules as $pattern => $params) {
 				$listPat = explode('/', $pattern);
 				//remove initial /
