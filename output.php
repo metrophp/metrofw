@@ -8,14 +8,14 @@ class Metrofw_Output {
 	 * save sparkmsg to session if redirecting
 	 * load sparkmsg from session if not redirecting
 	 */
-	public function output($req, $res) {
-		$this->statusHeader($res);
+	public function output($request, $response) {
+		$this->statusHeader($response);
 		$sess = _getMeA('session');
-		if (isset($res->redir)) {
-			$msg  = $res->get('sparkMsg');
+		if (isset($response->redir)) {
+			$msg  = $response->get('sparkMsg');
 			$sess->set('sparkMsg', $msg);
 
-			$this->redir($res);
+			$this->redir($response);
 			return;
 		}
 
@@ -23,12 +23,12 @@ class Metrofw_Output {
 		$msg  = $sess->get('sparkMsg');
 		if (!empty($msg)) {
 			foreach ($msg as $_m) {
-				$res->addTo('sparkMsg', $_m);
+				$response->addTo('sparkMsg', $_m);
 			}
 			$sess->clear('sparkMsg');
 		}
 
-		if ($req->isAjax) {
+		if ($request->isAjax) {
 			header('Content-type: application/json');
 			echo json_encode($res->sectionList);
 		} else {
@@ -39,26 +39,26 @@ class Metrofw_Output {
 	/**
 	 * Redirect user
 	 */
-	public function redir($res) {
+	public function redir($response) {
 //		echo 'You will be redirected here: <a href="'.$request->redir.'">'.$request->redir.'</a>';
-		header('Location: '.$res->redir);
+		header('Location: '.$response->redir);
 	}
 
 	/**
 	 * Set the HTTP status header again if output buffering is on
 	 */
-	public function hangup($req) {
-		$this->statusHeader($req);
+	public function hangup($request) {
+		$this->statusHeader($request);
 	}
 
-	public function statusHeader($res) {
+	public function statusHeader($response) {
 
 		//if no statusCode, set to 200
-		$code = $res->get('statusCode');
+		$code = $response->get('statusCode');
 		if (empty($code)) {
-			$res->set('statusCode', 200);
+			$response->set('statusCode', 200);
 		}
-		switch ($res->get('statusCode')) {
+		switch ($response->get('statusCode')) {
 
 			case 400:
 			header('HTTP/1.1 400 Bad Request');
@@ -82,7 +82,7 @@ class Metrofw_Output {
 			break;
 
 			default:
-			header('HTTP/1.1 '.$res->get('statusCode'));
+			header('HTTP/1.1 '.$response->get('statusCode'));
 			break;
 		}
 	}
