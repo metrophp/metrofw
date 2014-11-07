@@ -30,11 +30,13 @@ class Metrofw_Output {
 
 		if ($request->isAjax) {
 			header('Content-type: application/json');
-			echo json_encode($res->sectionList);
-		} else {
-			associate_iCanHandle('output', 'metrofw/template.php');
+			echo json_encode($response->sectionList);
+			//stop HTML output
+			_iCanOwn('output', 'metrofw/output.php::noop');
 		}
 	}
+
+	public function noop() {}
 
 	/**
 	 * Redirect user

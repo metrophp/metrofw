@@ -78,7 +78,7 @@ associate_iCanHandle('analyze',  'metrofw/analyzer.php');
 associate_iCanHandle('analyze',  'metrofw/router.php');
 associate_iCanHandle('resources', 'metrofw/utils.php');
 associate_iCanHandle('output', 'metrofw/output.php');
-associate_iCanHandle('exception', 'metrofw/template.php::onException');
+associate_iCanHandle('exception', 'metrofw/exdump.php::onException');
 
 associate_iAmA('request',  'metrofw/request.php');
 associate_iAmA('response', 'metrofw/response.php');

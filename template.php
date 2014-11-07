@@ -188,10 +188,10 @@ class Metrofw_Template {
 		$output = '';
 
 		//if nobody has a handle on this section, we'll handle it
-		if (!Metrofw_Template::hasHandlers($section)) {
-			associate_iCanHandle($section, 'metrofw/template.php');
+		if (!Metrofw_Template::hasHandlers('template.'.$section)) {
+			associate_iCanHandle('template.'.$section, 'metrofw/template.php');
 		}
-		while ($svc =  $associate->whoCanHandle($section)) {
+		while ($svc =  $associate->whoCanHandle('template.'.$section)) {
 			$output .= $svc[0]->template($request, $section);
 		}
 
@@ -206,10 +206,6 @@ class Metrofw_Template {
 		return (isset($associate->serviceList[$section]) &&
 			is_array($associate->serviceList[$section]) &&
 			count($associate->serviceList[$section]) > 0);
-	}
-
-	static public function onException($req, $res) {
-		echo _get('last_exception')->getMessage();
 	}
 }
 
