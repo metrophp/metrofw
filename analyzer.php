@@ -2,7 +2,7 @@
 
 class Metrofw_Analyzer {
 
-	public function analyze(&$request) {
+	public function analyze($request) {
 		$request->stripMagic();
 
 		$sapi = php_sapi_name();

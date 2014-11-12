@@ -2,7 +2,7 @@
 
 class Metrofw_Analyze_sapi_http {
 
-	public function analyze(&$request) {
+	public function analyze($request) {
 		$params = $_REQUEST;
 		$get = $_GET;
 		$request->sapiType = 'http';

@@ -2,15 +2,15 @@
 
 class Metrofw_Analyze_sapi_cli {
 
-	public function analyze(&$req) {
+	public function analyze($request) {
 		global $argv;
-		$req->sapiType = 'cli';
+		$request->sapiType = 'cli';
 
 		$get = array();
 		//cron.php or index.php from arg list
 		@array_shift($argv);
-		$req->requestedUrl = implode('/', $argv);
-//		$req->mse = $argv[0];
+		$request->requestedUrl = implode('/', $argv);
+//		$request->mse = $argv[0];
 //		@array_shift($argv);
 
 		foreach($argv as $num=>$p) { 
@@ -29,15 +29,15 @@ class Metrofw_Analyze_sapi_cli {
 				}
 			}
 		}
-		$req->getvars = $get;
+		$request->getvars = $get;
 
 		/**
 		 * determine if ajax
 		 */
-		if (in_array( 'xhr', array_keys($req->getvars),TRUE)) {
-			$req->isAjax = TRUE;
+		if (in_array( 'xhr', array_keys($request->getvars),TRUE)) {
+			$request->isAjax = TRUE;
 		} else {
-			$req->isAjax = FALSE;
+			$request->isAjax = FALSE;
 		}
 	}
 }

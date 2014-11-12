@@ -3,7 +3,7 @@
 class Metrofw_Analyze_sapi_cgi {
 
 
-	public function analyze(&$request) {
+	public function analyze($request) {
 		$params = $_REQUEST;
 		$get = $_GET;
 		$request->sapiType = 'cgi';

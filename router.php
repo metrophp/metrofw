@@ -4,14 +4,16 @@ class Metrofw_Router {
 
 	public $cycles = 0;
 
-	public function analyze(&$request) {
+	public function analyze($request) {
 
+/*
 		if ($request->requestedUrl == '' && $this->cycles == 0) {
 			$this->cycles++;
 			//let's stack ourselves at the end
 			associate_iCanHandle('analyze',  'metrofw/router.php');
 			return;
 		}
+*/
 		$url = $request->requestedUrl;
 
 		associate_set('baseuri', $request->baseUri);

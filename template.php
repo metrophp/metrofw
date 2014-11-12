@@ -37,7 +37,7 @@ class Metrofw_Template {
 	 *  
 	 * The output is returned.
 	 */
-	public function output($request) {
+	public function output($request, $response) {
 		$layout = associate_get('template_layout', 'index');
 
 		$templateName = associate_get('template_name', 'webapp01');
@@ -45,21 +45,15 @@ class Metrofw_Template {
 		$this->baseDir  = associate_get('template_basedir', 'local/templates/');
 		$this->baseUrl  = associate_get('template_baseuri', 'local/templates/');
 
-		associate_set('template_baseuri', $this->baseUrl);
 
 		associate_set('baseuri', $request->baseUri);
 
-		associate_iCanHandle('template.toplogin', 'metrofw/toplogin.php');
-		$this->parseTemplate($layout);
+		$templateName = associate_get('template_name');
+		$u = associate_getMeA('user');
+		$this->parseTemplate($request, $response, $templateName, $u, $layout);
 	}
 
-	public function parseTemplate($layout = 'index') {
-
-		$templateName = associate_get('template_name');
-		//scope
-
-		$req = associate_getMeA('request');
-		$u = associate_getMeA('user');
+	public function parseTemplate($request, $response, $templateName, $user=NULL, $layout = 'index') {
 
 		$templateIncluded = FALSE;
 		if ($layout == '') {
@@ -78,7 +72,7 @@ class Metrofw_Template {
 		if (!$templateIncluded) {
 			$errors = array();
 			$errors[] = 'Cannot include template '.$templateName.'.';
-			$req->httpStatus = '501';
+			$request->httpStatus = '501';
 			associate_set('output_errors', $errors);
 			associate_iCanHandle('output', 'metrofw/terrors.php');
 			return true;
@@ -89,9 +83,8 @@ class Metrofw_Template {
 	 * If response->$section exists, print it
 	 * else, see if there is a template file.
 	 */
-	public function template($request, $section) {
-		$response = associate_getMeA('response');
-		$sect = str_replace('template.', '', $section);
+	public function template($request, $response, $template_section) {
+		$sect = str_replace('template.', '', $template_section);
 
 		if ($response->has($sect)) {
 			$content = $response->get($sect);
@@ -109,7 +102,7 @@ class Metrofw_Template {
 		//let's include the template.main.file if the section is "main".
 		if ($sect != 'main') return;
 		$filesep = '/';
-		$subsection = substr($section, strpos($section, '.')+1);
+		$subsection = substr($template_section, strpos($section, '.')+1);
 		$viewFile = associate_get('template.main.file', $request->modName.'_'.$request->actName).'.html.php';
 		$fileChoices = array();
 		$fileChoices[] = $this->baseDir.'view'.$filesep.$viewFile;
@@ -182,19 +175,22 @@ class Metrofw_Template {
 	/**
 	 * Ask for who can handle the given section
 	 */
-	static public function parseSection($section) {
+	static public function parseSection($template_section) {
 		$associate = Nofw_Associate::getAssociate();
-		$request = $associate->getMeA('request');
+		$request   = $associate->getMeA('request');
+		$response  = $associate->getMeA('response');
 		$output = '';
 
 		//if nobody has a handle on this section, we'll handle it
 		if (!Metrofw_Template::hasHandlers('template.'.$section)) {
-			associate_iCanHandle('template.'.$section, 'metrofw/template.php');
-		}
-		while ($svc =  $associate->whoCanHandle('template.'.$section)) {
-			$output .= $svc[0]->template($request, $section);
+			associate_iCanHandle('template.'.$section, 'metrofw/template.php::template');
 		}
 
+		associate_set('template_section', $template_section);
+		//must call twice to reset internal array (designed to be run in while loop)
+		$master = $associate->whoCanHandle('master');
+		$master = $associate->whoCanHandle('master');
+		$master[0]->_runLifecycle('template.'.$template_section);
 		return $output."\n";
 	}
 
@@ -219,6 +215,7 @@ function m_turl($https=-1) {
 	static $baseUri;
 	static $templateName;
 	static $templatePath;
+
 	if (!$baseUri) {
 		$baseUri = associate_get('baseuri');
 	}
