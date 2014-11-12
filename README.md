@@ -1,6 +1,7 @@
 Metro Framework
 ======
-MSE (modular service event framework)
+Libraries for the nofw framework.  nofw is a small, lazy loading, dependency injection, event based lifecycle management kernel.
+These metrofw libraries will give you things like a router and template parsing.
 
 
 File layout
@@ -75,9 +76,11 @@ Sample Configuration for Nofw (the no framework framework)
 =====
 ```php
 associate_iCanHandle('analyze',  'metrofw/analyzer.php');
-associate_iCanHandle('analyze',  'metrofw/router.php');
+associate_iCanHandle('analyze',  'metrofw/router.php', 3);
 associate_iCanHandle('resources', 'metrofw/utils.php');
-associate_iCanHandle('output', 'metrofw/output.php');
+associate_iCanHandle('output',    'metrofw/output.php');
+//will be removed if output.php doesn't think we need HTML output
+associate_iCanHandle('output',    'metrofw/template.php', 3);
 associate_iCanHandle('exception', 'metrofw/exdump.php::onException');
 
 associate_iAmA('request',  'metrofw/request.php');
