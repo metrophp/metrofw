@@ -9,6 +9,12 @@ class Metrofw_Output {
 	 * load sparkmsg from session if not redirecting
 	 */
 	public function output($request, $response) {
+		if (strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gz')!==FALSE) {
+			ob_start('ob_gzhandler');
+		} else {
+			ob_start();
+		}
+
 		$this->statusHeader($response);
 		$sess = _getMeA('session');
 		if (isset($response->redir)) {
