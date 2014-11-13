@@ -82,6 +82,7 @@ associate_iCanHandle('output',    'metrofw/output.php');
 //will be removed if output.php doesn't think we need HTML output
 associate_iCanHandle('output',    'metrofw/template.php', 3);
 associate_iCanHandle('exception', 'metrofw/exdump.php::onException');
+associate_iCanHandle('hangup',    'metrofw/output.php');
 
 associate_iAmA('request',  'metrofw/request.php');
 associate_iAmA('response', 'metrofw/response.php');
