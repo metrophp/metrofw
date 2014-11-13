@@ -35,10 +35,17 @@ class Metrofw_Output {
 		}
 
 		if ($request->isAjax) {
-			header('Content-type: application/json');
-			echo json_encode($response->sectionList);
-			//stop HTML output
+			//sometimes ajax wants HTML, sometimes it doesn't
+			if (strpos($_SERVER['HTTP_ACCEPT'], 'html')===FALSE) {
+				header('Content-type: application/json');
+				echo json_encode($response->sectionList);
+				//stop HTML output
+				_iCanOwn('output', 'metrofw/output.php::noop');
+			}
+			//enable partial HTML rendering
+			//TODO: remove hardcoded dependency?
 			_iCanOwn('output', 'metrofw/output.php::noop');
+			Metrofw_Template::parseSection('main');
 		}
 	}
 
