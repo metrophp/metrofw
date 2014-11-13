@@ -62,11 +62,11 @@ class Metrofw_Output {
 	public function statusHeader($response) {
 
 		//if no statusCode, set to 200
-		$code = $response->get('statusCode');
+		$code = $response->statusCode;
 		if (empty($code)) {
-			$response->set('statusCode', 200);
+			$response->statusCode = 200;
 		}
-		switch ($response->get('statusCode')) {
+		switch ($response->statusCode) {
 
 			case 400:
 			header('HTTP/1.1 400 Bad Request');
@@ -88,6 +88,13 @@ class Metrofw_Output {
 			case 200:
 			header('HTTP/1.1 200 OK');
 			break;
+
+			case 301:
+			//cannot send any http body with 301, even gz header
+			ob_end_clean();
+			header('HTTP/1.1 301 Not Modified');
+			break;
+
 
 			default:
 			header('HTTP/1.1 '.$response->get('statusCode'));
