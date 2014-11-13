@@ -2,8 +2,9 @@
 
 class Metrofw_Terrors {
 
-	public function output(&$req) {
+	public function output($request) {
 
+		$request->set('statusCode', '500');
 		$errors = associate_get('output_errors');
 		if (!is_array($errors)) {
 			return;
@@ -17,11 +18,9 @@ class Metrofw_Terrors {
 		echo "</ul>\n";
 	}
 
-	public function template(&$req, $section) {
+	public function template($request, $template_section) {
 
-		$req = associate_getMeA('request');
-		$req->httpStatus = '500';
-
+		$request->statusCode = '500';
 		$errors = associate_get('output_errors');
 		if (!is_array($errors)) {
 			return;
