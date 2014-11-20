@@ -1,8 +1,20 @@
 Metro Framework
 ======
-Libraries for the nofw framework.  nofw is a small, lazy loading, dependency injection, event based lifecycle management kernel.
-These metrofw libraries will give you things like a router and template parsing.
+Libraries for fast websites.  Metrofw is a small, lazy loading, dependency injection, event based lifecycle management kernel.
+These metrofw libraries will give you things like a router and template parsing.  Relies on Metrodi\_Container for lazy
+dependency injection.
 
+
+Installation
+=======
+Use metrophp/metroproject to get a base file strucutre and composer dependency.
+```
+  git clone https://github.com/metrophp/metroproject.git
+  cd metroproject.git
+  rm -rf .git/
+  composer install
+  git init .
+```
 
 File layout
 ----
@@ -72,40 +84,40 @@ If you are parsing the "main" section, and there is nothing added to your respon
 The file naming is *service _ event .html.php*  The service and event are the second 2 parts of the URL after the module
 
 
-Sample Configuration for Nofw (the no framework framework)
+Sample Bootstrap file to work with Metro DI (metrophp/metrodi)
 =====
 ```php
-associate_iCanHandle('analyze',  'metrofw/analyzer.php');
-associate_iCanHandle('analyze',  'metrofw/router.php', 3);
-associate_iCanHandle('resources', 'metrofw/utils.php');
-associate_iCanHandle('output',    'metrofw/output.php');
+_iCanHandle('analyze',   'metrofw/analyzer.php');
+_iCanHandle('analyze',   'metrofw/router.php', 3);
+_iCanHandle('resources', 'metrofw/utils.php');
+_iCanHandle('output',    'metrofw/output.php');
 //will be removed if output.php doesn't think we need HTML output
-associate_iCanHandle('output',    'metrofw/template.php', 3);
-associate_iCanHandle('exception', 'metrofw/exdump.php::onException');
-associate_iCanHandle('hangup',    'metrofw/output.php');
+_iCanHandle('output',    'metrofw/template.php', 3);
+_iCanHandle('exception', 'metrofw/exdump.php::onException');
+_iCanHandle('hangup',    'metrofw/output.php');
 
-associate_iAmA('request',  'metrofw/request.php');
-associate_iAmA('response', 'metrofw/response.php');
-associate_iAmA('router',   'metrofw/router.php');
+_didef('request',        'metrofw/request.php');
+_didef('response',       'metrofw/response.php');
+_didef('router',         'metrofw/router.php');
 
-associate_set('template_basedir', 'templates/');
-associate_set('template_baseuri', 'templates/');
-associate_set('template_name', 'webapp01');
+_set('template_basedir', 'templates/');
+_set('template_baseuri', 'templates/');
+_set('template_name',    'webapp01');
 
-associate_set('route_rules', 
+_set('route_rules', 
 	array_merge(array('/:appName'=>array( 'modName'=>'main', 'actName'=>'main' )),
-	associate_get('route_rules')));
+	_get('route_rules')));
 
-associate_set('route_rules', 
+_set('route_rules', 
 	array_merge(array('/:appName/:modName'=>array( 'actName'=>'main' )),
-	associate_get('route_rules')));
+	_get('route_rules')));
 
-associate_set('route_rules', 
+_set('route_rules', 
 	array_merge(array('/:appName/:modName/:actName'=>array(  )),
-	associate_get('route_rules')));
+	_get('route_rules')));
 
-associate_set('route_rules', 
+_set('route_rules', 
 	array_merge(array('/:appName/:modName/:actName/:arg'=>array(  )),
-	associate_get('route_rules')));
+	_get('route_rules')));
 ```
 
