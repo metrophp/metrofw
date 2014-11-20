@@ -1,0 +1,14 @@
+<?php
+
+class Tests_Emptyhandler {
+
+
+	public function __construct($request='', $response='') {
+		$this->request  = $request;
+		$this->response = $response;
+	}
+
+	public function testphase($param1, $param2) {
+		return true;
+	}
+}
