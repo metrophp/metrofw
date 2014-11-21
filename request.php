@@ -17,7 +17,7 @@ class Metrofw_Request {
 	public $sapiType       = '';
 	public $isAjax         = FALSE;
 	public $prodEnv        = 'prod';
-	public $httpStatus     = '200';
+	public $statusCode     = '200';
 
 	public $appUrl         = '';
 	public $appName        = 'main';

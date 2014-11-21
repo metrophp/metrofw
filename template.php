@@ -72,7 +72,7 @@ class Metrofw_Template {
 		if (!$templateIncluded) {
 			$errors = array();
 			$errors[] = 'Cannot include template '.$templateName.'.';
-			$request->httpStatus = '501';
+			$request->statusCode = '501';
 			associate_set('output_errors', $errors);
 			associate_iCanHandle('output', 'metrofw/terrors.php');
 			return true;
