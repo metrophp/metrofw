@@ -1,6 +1,6 @@
 {
     "name": "metrofw",
-    "version": "0.9.4",
+    "version": "0.9.5",
     "license": "MIT",
     "authors": [
         {
@@ -18,7 +18,7 @@
         }
     ],
 	"require-dev": {
-		"metrodi": ">=3.0.0-beta2"
+		"metrodi": ">=3.0.0-beta5"
 	},
     "require": {}
 }
