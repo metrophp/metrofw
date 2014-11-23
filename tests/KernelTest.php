@@ -9,13 +9,13 @@ class Metrofw_Tests_Kernel extends PHPUnit_Framework_TestCase {
 		$this->kernel = new Metrofw_Kernel(Metrodi_Container::getContainer());
 	}
 
-	public function test_event_params_are_mutable() {
+	public function test_signal_params_are_mutable() {
 		_iCanHandle('Fire', array($this, 'evtHandler'));
 		_iCanHandle('Fire_post', array($this, 'evtPostHandler'));
 		$x = 1;
 		$y = 'a';
 		$args = array($x, $y);
-		$result = Metrofw_Kernel::event('Fire', $this, $args);
+		$result = Metrofw_Kernel::emit('Fire', $this, $args);
 		$this->assertTrue($result);
 		$this->assertEquals( $args[0], 2);
 		$this->assertEquals( $args[1], 'z');
@@ -124,6 +124,15 @@ class Metrofw_Tests_Kernel extends PHPUnit_Framework_TestCase {
 		$this->assertTrue( $k->hasHandlers('authorize') );
 		$this->assertTrue( $k->hasHandlers('authenticate') );
 	}
+
+	public function test_capitalize_dotted_lifecycles() {
+		$k = $this->kernel;
+		$stub = new Metrofw_Tests_Kernel_Handler();
+		$k->iCanHandle('camel.case.func', $stub);
+
+		$k->runLifecycle('camel.case.func');
+		$this->assertEquals( 1, $stub->called );
+	}
 }
 
 class Metrofw_Tests_Kernel_Handler {
@@ -134,5 +143,9 @@ class Metrofw_Tests_Kernel_Handler {
 	public function authorize($param1=NULL) {
 		$this->called++;
 		$this->param = $param1;
+	}
+
+	public function camelCaseFunc() {
+		$this->called++;
 	}
 }

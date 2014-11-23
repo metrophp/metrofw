@@ -52,34 +52,35 @@ class Metrofw_Kernel {
 	}
 
 	/**
-	 * Handle events, which return TRUE to keep the 
+	 * Handle signals and slots, which return TRUE to keep the 
 	 * event propogating
 	 */
-	public static function event($evtName, $source, &$args=array()) {
+	public static function emit($signalName, $source, &$args=array()) {
 		$k = Metrofw_Kernel::getKernel();
 		$container = $k->container;
 		if (!empty($args) && count($args) == 0) {
 			$args['request']  = $container->make('request');
 			$args['response'] = $container->make('response');
 		}
-		$event = $container->make('event');
-		$event->set('source', $source);
+		$signal = $container->make('signal');
+		$signal->set('source', $source);
+		$signal->set('name',   $signalName);
 		$continue = true;
-		while ($svc = $k->whoCanHandle($evtName.'_pre')) {
+		while ($svc = $k->whoCanHandle($signalName.'_pre')) {
 			if (is_callable($svc))
-			$continue = $svc[0]->{$svc[1]}($event, $args);
+			$continue = $svc[0]->{$svc[1]}($signal, $args);
 			if (!$continue);break;
 		}
 
-		while ($svc = $k->whoCanHandle($evtName)) {
+		while ($svc = $k->whoCanHandle($signalName)) {
 			if (is_callable($svc))
-			$continue = $svc[0]->{$svc[1]}($event, $args);
+			$continue = $svc[0]->{$svc[1]}($signal, $args);
 			if (!$continue);break;
 		}
 
-		while ($svc = $k->whoCanHandle($evtName.'_post')) {
+		while ($svc = $k->whoCanHandle($signalName.'_post')) {
 			if (is_callable($svc))
-			$continue = $svc[0]->{$svc[1]}($event, $args);
+			$continue = $svc[0]->{$svc[1]}($signal, $args);
 			if (!$continue);break;
 		}
 
@@ -219,6 +220,17 @@ class Metrofw_Kernel {
 				return FALSE;
 			}
 		}
+
+        //change service.sub.sub to serviceSubSub()
+        if(strpos($calledService, '.') !== FALSE) { 
+            //clean cycle.sub.sub into cycleSubSub
+            $funcParts = explode('.', $calledService);
+            array_walk( $funcParts, function(&$value, $key) { 
+                $value = ucfirst($value);
+            });
+            $calledService = lcfirst( implode('', $funcParts ));
+        }
+
 		//you can tell the container iCanHandle('service', $obj)
 		// as well as passing it a file.
 		if (is_object($svc[1])) {
@@ -284,6 +296,16 @@ class Metrofw_Kernel {
 function _iCanHandle($service, $file, $priority=2) {
 	$a = Metrofw_Kernel::getKernel();
 	$a->iCanHandle($service, $file, $priority);
+}
+
+function _connect($service, $locator, $priority=2) {
+	$a = Metrofw_Kernel::getKernel();
+	$a->iCanHandle($service, $locator, $priority);
+}
+
+function _connectSignal($service, $locator, $priority=2) {
+	$a = Metrofw_Kernel::getKernel();
+	$a->iCanHandle($service, $locator, $priority);
 }
 
 function _iCanOwn($service, $file) {
