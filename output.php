@@ -8,7 +8,7 @@ class Metrofw_Output {
 	 * save sparkmsg to session if redirecting
 	 * load sparkmsg from session if not redirecting
 	 */
-	public function output($request, $response) {
+	public function output($request, $response, $session) {
 		if (strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gz')!==FALSE) {
 			ob_start('ob_gzhandler');
 		} else {
@@ -16,22 +16,21 @@ class Metrofw_Output {
 		}
 
 		$this->statusHeader($response);
-		$sess = _getMeA('session');
 		if (isset($response->redir)) {
 			$msg  = $response->get('sparkMsg');
-			$sess->set('sparkMsg', $msg);
+			$session->set('sparkMsg', $msg);
 
 			$this->redir($response);
 			return;
 		}
 
 
-		$msg  = $sess->get('sparkMsg');
+		$msg  = $session->get('sparkMsg');
 		if (!empty($msg)) {
 			foreach ($msg as $_m) {
 				$response->addTo('sparkMsg', $_m);
 			}
-			$sess->clear('sparkMsg');
+			$session->clear('sparkMsg');
 		}
 
 		if ($request->isAjax) {
