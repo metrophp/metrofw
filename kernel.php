@@ -230,15 +230,15 @@ class Metrofw_Kernel {
 			}
 		}
 
-        //change service.sub.sub to serviceSubSub()
-        if(strpos($calledService, '.') !== FALSE) { 
-            //clean cycle.sub.sub into cycleSubSub
-            $funcParts = explode('.', $calledService);
-            array_walk( $funcParts, function(&$value, $key) { 
-                $value = ucfirst($value);
-            });
-            $calledService = lcfirst( implode('', $funcParts ));
-        }
+		//change service.sub.sub to serviceSubSub()
+		if(strpos($calledService, '.') !== FALSE) {
+			//clean cycle.sub.sub into cycleSubSub
+			$funcParts = explode('.', $calledService);
+			array_walk( $funcParts, function(&$value, $key) {
+					$value = ucfirst($value);
+					});
+			$calledService = lcfirst( implode('', $funcParts ));
+		}
 
 		//you can tell the container iCanHandle('service', $obj)
 		// as well as passing it a file.
@@ -292,6 +292,9 @@ class Metrofw_Kernel {
 		}
 	}
 
+	/**
+	 * @DEPRECATED
+	 */
 	public function iCanOwn($service, $file) {
 		//resets automatically
 		$this->serviceList[$service] = array($file);
@@ -300,6 +303,12 @@ class Metrofw_Kernel {
 			$this->serviceList[$endService] = array();
 		}
 	}
+
+	public function clearHandlers($service) {
+		unset($this->serviceList[$service]);
+		unset($this->serviceList['post_'.$service]);
+	}
+
 }
 
 function _iCanHandle($service, $file, $priority=2) {
@@ -317,9 +326,17 @@ function _connectSignal($service, $locator, $priority=2) {
 	$a->iCanHandle($service, $locator, $priority);
 }
 
+/**
+ * @DEPRECATED
+ */
 function _iCanOwn($service, $file) {
 	$a = Metrofw_Kernel::getKernel();
 	$a->iCanOwn($service, $file);
+}
+
+function _clearHandlers($service) {
+	$a = Metrofw_Kernel::getKernel();
+	$a->clearHandlers($service);
 }
 
 function _hasHandlers($service) {
