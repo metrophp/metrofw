@@ -82,10 +82,14 @@ class Metrofw_Template {
 	 * If response->$section exists, print it
 	 * else, see if there is a template file.
 	 */
-	public function template($signal, &$args) {
+	//public function template($signal, &$args) {
+	public function template($request, $response, $template_section) {
+/*
 		$sect     = str_replace('template.', '', $args['template_section']);
 		$response = $args['response'];
 		$request  = $args['request'];
+*/
+		$sect     = str_replace('template.', '', $template_section);
 
 		if ($response->has($sect)) {
 			$content = $response->get($sect);
@@ -94,16 +98,19 @@ class Metrofw_Template {
 				foreach ($content as $c) {
 					$html .= $this->transformContent($c);
 				}
-				return $html;
+				echo $html;
+				return;
 			} else {
-				return $this->transformContent($content);
+				echo $this->transformContent($content);
+				return;
 			}
 		}
 		//we don't have a section in the response
 		//let's include the template.main.file if the section is "main".
 		if ($sect != 'main') return;
 		$filesep = '/';
-		$subsection = substr($args['template_section'], strpos($args['template_section'], '.')+1);
+		//$subsection = substr($args['template_section'], strpos($args['template_section'], '.')+1);
+		$subsection = substr($template_section, strpos($template_section, '.')+1);
 		$viewFile = _get('template.main.file', $request->modName.'_'.$request->actName).'.html.php';
 		$fileChoices = array();
 		$fileChoices[] = $this->baseDir.'view'.$filesep.$viewFile;
@@ -128,7 +135,8 @@ class Metrofw_Template {
 			_set('output_errors', $errors);
 			_iCanHandle('template.main', 'metrofw/terrors.php');
 		}
-		$args['output'] .= ob_get_contents() . substr( ob_end_clean(), 0, 0);
+		echo ob_get_contents() . substr( ob_end_clean(), 0, 0);
+		//$args['output'] .= ob_get_contents() . substr( ob_end_clean(), 0, 0);
 
 		/*
 		//we have some special output,
@@ -184,9 +192,10 @@ class Metrofw_Template {
 
 		//if nobody has a handle on this section, we'll handle it
 		if (! $kernel->hasHandlers('template.'.$template_section)) {
-			_connectSignal('template.'.$template_section, 'metrofw/template.php::template');
+			_connect('template.'.$template_section, 'metrofw/template.php::template');
 		}
-		$kernel->emit('template.'.$template_section, $kernel, $args);
+		_set('template_section', $template_section);
+		$kernel->runLifecycle('template.'.$template_section);
 		return $args['output'];
 	}
 }
