@@ -122,6 +122,11 @@ class Metrofw_Kernel {
 				if ($value === NULL && $v->isDefaultValueAvailable()) {
 					$value = $v->getDefaultValue();
 				}
+				//lastly, just give a prototype object
+				if ($value === NULL) {
+					$value = $this->container->make($thing);
+				}
+
 				$args[] = $value;
 			}
 			$method->invokeArgs($svc[0], $args);
