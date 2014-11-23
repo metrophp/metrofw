@@ -107,13 +107,22 @@ class Metrofw_Kernel {
 			$params = $method->getParameters();
 			$args   = array();
 			foreach ($params as $k=>$v) {
-				if (!$v->getClass() || $v->getClass()->name == '') {  //untyped parameter
-					$args[] =& $this->container->make($v->name);
-				} elseif ($v->getClass()) {
-					$args[] =& $this->container->make($v->getClass()->name);
-				} else {
-					$args[] =& $this->container->make($v->getDefaultValue());
+				$value = NULL;
+				$thing = $v->name; //assume untyped parameter
+				if ($v->getClass()) {
+					$thing = $v->getClass()->name;
 				}
+				//try simple get/set flags
+				$value = $this->container->get($thing, NULL);
+				//try making an object
+				if ($value === NULL && $this->container->isThingDefined($thing)) {
+					$value = $this->container->make($thing);
+				}
+				//just get default value defined in function sig
+				if ($value === NULL && $v->isDefaultValueAvailable()) {
+					$value = $v->getDefaultValue();
+				}
+				$args[] = $value;
 			}
 			$method->invokeArgs($svc[0], $args);
 		}
