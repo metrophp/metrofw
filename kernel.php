@@ -11,8 +11,11 @@ class Metrofw_Kernel {
 	/**
 	 * Cache reference
 	 */
-	public function __construct($container) {
-		$this->container = Metrodi_Container::getContainer();
+	public function __construct($container=NULL) {
+		$this->container = $container;
+		if ($this->container == NULL) {
+			$this->container = Metrodi_Container::getContainer();
+		}
 
 		ini_set('display_errors', 'on');
 		set_exception_handler( array(&$this, 'onException') );
