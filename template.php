@@ -82,8 +82,10 @@ class Metrofw_Template {
 	 * If response->$section exists, print it
 	 * else, see if there is a template file.
 	 */
-	public function template($request, $response, $template_section) {
-		$sect = str_replace('template.', '', $template_section);
+	public function template($signal, &$args) {
+		$sect     = str_replace('template.', '', $args['template_section']);
+		$response = $args['response'];
+		$request  = $args['request'];
 
 		if ($response->has($sect)) {
 			$content = $response->get($sect);
@@ -101,7 +103,7 @@ class Metrofw_Template {
 		//let's include the template.main.file if the section is "main".
 		if ($sect != 'main') return;
 		$filesep = '/';
-		$subsection = substr($template_section, strpos($section, '.')+1);
+		$subsection = substr($args['template_section'], strpos($args['template_section'], '.')+1);
 		$viewFile = _get('template.main.file', $request->modName.'_'.$request->actName).'.html.php';
 		$fileChoices = array();
 		$fileChoices[] = $this->baseDir.'view'.$filesep.$viewFile;
@@ -113,7 +115,7 @@ class Metrofw_Template {
 		ob_start();
 		$success = FALSE;
 		foreach ($fileChoices as $_f) {
-			if (include($_f)) {
+			if (@include($_f)) {
 				$success = TRUE;
 				break;
 			}
@@ -126,9 +128,7 @@ class Metrofw_Template {
 			_set('output_errors', $errors);
 			_iCanHandle('template.main', 'metrofw/terrors.php');
 		}
-		/*
-		 */
-		return ob_get_contents() . substr( ob_end_clean(), 0, 0);
+		$args['output'] .= ob_get_contents() . substr( ob_end_clean(), 0, 0);
 
 		/*
 		//we have some special output,
@@ -175,30 +175,19 @@ class Metrofw_Template {
 	 * Ask for who can handle the given section
 	 */
 	static public function parseSection($template_section) {
-		$container = Metrodi_Container::getContainer();
-		$request   = $container->make('request');
-		$response  = $container->make('response');
-		$output = '';
+		$kernel                   = Metrofw_Kernel::getKernel();
+		$container                = $kernel->container;
+		$args['request']          = $container->make('request');
+		$args['response']         = $container->make('response');
+		$args['output']           = '';
+		$args['template_section'] = $template_section;
 
 		//if nobody has a handle on this section, we'll handle it
-		if (!Metrofw_Template::hasHandlers('template.'.$section)) {
-			_iCanHandle('template.'.$section, 'metrofw/template.php::template');
+		if (! $kernel->hasHandlers('template.'.$template_section)) {
+			_connectSignal('template.'.$template_section, 'metrofw/template.php::template');
 		}
-
-		_set('template_section', $template_section);
-		//must call twice to reset internal array (designed to be run in while loop)
-		$master = $container->whoCanHandle('master');
-		$master = $container->whoCanHandle('master');
-		$master[0]->_runLifecycle('template.'.$template_section);
-		return $output."\n";
-	}
-
-	/**
-	 * Ask the kernel if a section has anyone listening
-	 */
-	static public function hasHandlers($section) {
-		$kernel = Metrofw_Kernel::getKernel();
-		return $kernel->hasHandlers($section);
+		$kernel->emit('template.'.$template_section, $kernel, $args);
+		return $args['output'];
 	}
 }
 
