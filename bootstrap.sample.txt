@@ -1,32 +1,32 @@
 
 //append to or merge this with to your etc/bootstrap.php
 
-associate_iCanHandle('analyze',  'metrofw/analyzer.php');
-associate_iCanHandle('analyze',  'metrofw/router.php');
-associate_iCanHandle('resources', 'metrofw/utils.php');
-associate_iCanHandle('output', 'metrofw/output.php');
-associate_iCanHandle('exception', 'metrofw/template.php::onException');
+_iCanHandle('analyze',  'metrofw/analyzer.php');
+_iCanHandle('analyze',  'metrofw/router.php');
+_iCanHandle('resources', 'metrofw/utils.php');
+_iCanHandle('output', 'metrofw/output.php');
+_iCanHandle('exception', 'metrofw/template.php::onException');
 
-associate_iAmA('request',  'metrofw/request.php');
-associate_iAmA('response', 'metrofw/response.php');
-associate_iAmA('router',   'metrofw/router.php');
+_iAmA('request',  'metrofw/request.php');
+_iAmA('response', 'metrofw/response.php');
+_iAmA('router',   'metrofw/router.php');
 
-associate_set('template_basedir', 'templates/');
-associate_set('template_baseuri', 'templates/');
-associate_set('template_name', 'webapp01');
+_set('template_basedir', 'templates/');
+_set('template_baseuri', 'templates/');
+_set('template_name', 'webapp01');
 
-associate_set('route_rules', 
+_set('route_rules', 
 	array_merge(array('/:appName'=>array( 'modName'=>'main', 'actName'=>'main' )),
-	associate_get('route_rules')));
+	_get('route_rules')));
 
-associate_set('route_rules', 
+_set('route_rules', 
 	array_merge(array('/:appName/:modName'=>array( 'actName'=>'main' )),
-	associate_get('route_rules')));
+	_get('route_rules')));
 
-associate_set('route_rules', 
+_set('route_rules', 
 	array_merge(array('/:appName/:modName/:actName'=>array(  )),
-	associate_get('route_rules')));
+	_get('route_rules')));
 
-associate_set('route_rules', 
+_set('route_rules', 
 	array_merge(array('/:appName/:modName/:actName/:arg'=>array(  )),
-	associate_get('route_rules')));
+	_get('route_rules')));

@@ -10,19 +10,19 @@ class Metrofw_Analyzer {
 		switch($sapi) { 
 
 			case "cli":
-				associate_iCanHandle('analyze', 'metrofw/analyze_sapi_cli.php');
+				_iCanHandle('analyze', 'metrofw/analyze_sapi_cli.php');
 			break;
 
 			case "apache":
 			case "apache2filter":
 			case "apache2handler":
-				associate_iCanHandle('analyze', 'metrofw/analyze_sapi_http.php');
+				_iCanHandle('analyze', 'metrofw/analyze_sapi_http.php');
 			break;
 
 			case "cgi-fcgi":
 			case "fpm-fcgi":
 			case "cgi":
-				associate_iCanHandle('analyze', 'metrofw/analyze_sapi_cgi.php');
+				_iCanHandle('analyze', 'metrofw/analyze_sapi_cgi.php');
 			break;
 
 			default:

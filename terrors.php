@@ -5,7 +5,7 @@ class Metrofw_Terrors {
 	public function output($request) {
 
 		$request->set('statusCode', '500');
-		$errors = associate_get('output_errors');
+		$errors = _get('output_errors');
 		if (!is_array($errors)) {
 			return;
 		}
@@ -21,7 +21,7 @@ class Metrofw_Terrors {
 	public function template($request, $template_section) {
 
 		$request->statusCode = '500';
-		$errors = associate_get('output_errors');
+		$errors = _get('output_errors');
 		if (!is_array($errors)) {
 			return;
 		}

@@ -14,7 +14,7 @@ class Metrofw_Template {
 	 * This function handles redirects if 
 	 * $request->redir is set
 	 *
-	 * $this function also sets associate flags:
+	 * $this function also sets DI flags:
 	 *
 	 * 'template_name' to 'webapp01' if it is not set,
 	 *
@@ -25,7 +25,7 @@ class Metrofw_Template {
 	 * This function handles template section "template.main"
 	 * if no other handler is installed for that section.
 	 * If there is no $request->output, it includes 
-	 * the associate flag "template.main.file"
+	 * the DI flag "template.main.file"
 	 * if there is no file, it defaults to 
 	 * templates/$appName/template.mainmain.html.php 
 	 *
@@ -37,20 +37,19 @@ class Metrofw_Template {
 	 *  
 	 * The output is returned.
 	 */
-	public function output($request, $response) {
-		$layout = associate_get('template_layout', 'index');
+	public function output($request, $response, $user) {
+		$layout = _get('template_layout', 'index');
 
-		$templateName = associate_get('template_name', 'webapp01');
-		associate_set('template_name', $templateName);
-		$this->baseDir  = associate_get('template_basedir', 'local/templates/');
-		$this->baseUrl  = associate_get('template_baseuri', 'local/templates/');
+		$templateName = _get('template_name', 'webapp01');
+		_set('template_name', $templateName);
+		$this->baseDir  = _get('template_basedir', 'local/templates/');
+		$this->baseUrl  = _get('template_baseuri', 'local/templates/');
 
 
-		associate_set('baseuri', $request->baseUri);
+		_set('baseuri', $request->baseUri);
 
-		$templateName = associate_get('template_name');
-		$u = associate_getMeA('user');
-		$this->parseTemplate($request, $response, $templateName, $u, $layout);
+		$templateName = _get('template_name');
+		$this->parseTemplate($request, $response, $templateName, $user, $layout);
 	}
 
 	public function parseTemplate($request, $response, $templateName, $user=NULL, $layout = 'index') {
@@ -61,8 +60,8 @@ class Metrofw_Template {
 		}
 
 		//try special style, if not fall back to index
-		if (!@include( $this->baseDir. $templateName.'/'.$layout.'.html.php') ) {
-			if(@include($this->baseDir. $templateName.'/index.html.php')) {
+		if (!include( $this->baseDir. $templateName.'/'.$layout.'.html.php') ) {
+			if(include($this->baseDir. $templateName.'/index.html.php')) {
 				$templateIncluded = TRUE;
 			}
 		} else {
@@ -72,9 +71,9 @@ class Metrofw_Template {
 		if (!$templateIncluded) {
 			$errors = array();
 			$errors[] = 'Cannot include template '.$templateName.'.';
-			$request->statusCode = '501';
-			associate_set('output_errors', $errors);
-			associate_iCanHandle('output', 'metrofw/terrors.php');
+			$request->httpStatus = '501';
+			_set('output_errors', $errors);
+			_iCanHandle('output', 'metrofw/terrors.php');
 			return true;
 		}
 	}
@@ -103,7 +102,7 @@ class Metrofw_Template {
 		if ($sect != 'main') return;
 		$filesep = '/';
 		$subsection = substr($template_section, strpos($section, '.')+1);
-		$viewFile = associate_get('template.main.file', $request->modName.'_'.$request->actName).'.html.php';
+		$viewFile = _get('template.main.file', $request->modName.'_'.$request->actName).'.html.php';
 		$fileChoices = array();
 		$fileChoices[] = $this->baseDir.'view'.$filesep.$viewFile;
 		$fileChoices[] = 'local'.
@@ -122,10 +121,10 @@ class Metrofw_Template {
 
 		if (!$success) {
 			$errors = array();
-			$errors = associate_get('output_errors', $errors);
+			$errors = _get('output_errors', $errors);
 			$errors[] = 'Cannot include view file. ' . $viewFile;
-			associate_set('output_errors', $errors);
-			associate_iCanHandle('template.main', 'metrofw/terrors.php');
+			_set('output_errors', $errors);
+			_iCanHandle('template.main', 'metrofw/terrors.php');
 		}
 		/*
 		 */
@@ -176,37 +175,35 @@ class Metrofw_Template {
 	 * Ask for who can handle the given section
 	 */
 	static public function parseSection($template_section) {
-		$associate = Nofw_Associate::getAssociate();
-		$request   = $associate->getMeA('request');
-		$response  = $associate->getMeA('response');
+		$container = Metrodi_Container::getContainer();
+		$request   = $container->make('request');
+		$response  = $container->make('response');
 		$output = '';
 
 		//if nobody has a handle on this section, we'll handle it
 		if (!Metrofw_Template::hasHandlers('template.'.$section)) {
-			associate_iCanHandle('template.'.$section, 'metrofw/template.php::template');
+			_iCanHandle('template.'.$section, 'metrofw/template.php::template');
 		}
 
-		associate_set('template_section', $template_section);
+		_set('template_section', $template_section);
 		//must call twice to reset internal array (designed to be run in while loop)
-		$master = $associate->whoCanHandle('master');
-		$master = $associate->whoCanHandle('master');
+		$master = $container->whoCanHandle('master');
+		$master = $container->whoCanHandle('master');
 		$master[0]->_runLifecycle('template.'.$template_section);
 		return $output."\n";
 	}
 
 	/**
-	 * Ask associate if a section has anyone listening
+	 * Ask the kernel if a section has anyone listening
 	 */
 	static public function hasHandlers($section) {
-		$associate = Nofw_Associate::getAssociate();
-		return (isset($associate->serviceList[$section]) &&
-			is_array($associate->serviceList[$section]) &&
-			count($associate->serviceList[$section]) > 0);
+		$kernel = Metrofw_Kernel::getKernel();
+		return $kernel->hasHandlers($section);
 	}
 }
 
 function sitename() {
-	return associate_get('sitename', 'Metro');
+	return _get('sitename', 'Metro');
 }
 
 /**
@@ -217,13 +214,13 @@ function m_turl($https=-1) {
 	static $templatePath;
 
 	if (!$baseUri) {
-		$baseUri = associate_get('baseuri');
+		$baseUri = _get('baseuri');
 	}
 	if (!$templatePath) {
-		$templatePath = associate_get('template_baseuri');
+		$templatePath = _get('template_baseuri');
 	}
 	if (!$templateName) {
-		$templateName = associate_get('template_name');
+		$templateName = _get('template_name');
 	}
 	$end = $baseUri.$templatePath.$templateName.'/';
 

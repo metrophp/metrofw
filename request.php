@@ -69,7 +69,7 @@ class Metrofw_Request {
 	 * @return Object   the default session object.
 	 */
 	public function getSession() {
-		return associate_getMeA('session');
+		return _make('session');
 	}
 
 	/**
@@ -308,7 +308,7 @@ class Metrofw_Request {
 	}
 
 	public function getUser() {
-		return associate_getMeA('user');
+		return _make('user');
 	}
 }
 
