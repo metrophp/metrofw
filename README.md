@@ -104,6 +104,8 @@ _set('template_basedir', 'templates/');
 _set('template_baseuri', 'templates/');
 _set('template_name',    'webapp01');
 
+_set('route_rules', array());
+
 _set('route_rules', 
 	array_merge(array('/:appName'=>array( 'modName'=>'main', 'actName'=>'main' )),
 	_get('route_rules')));
