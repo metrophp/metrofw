@@ -71,9 +71,16 @@ class Metrofw_Router {
 	/**
 	 * If nothing has routed the request try route_rules pattern matching or our best guess
 	 */
-	public function autoRoute($request, $response) {
+	public function autoRoute($request, $kernel=NULL, $container=NULL) {
 		if ($request->isRouted) {
 			return;
+		}
+		if ($container === NULL) {
+			$container = Metrodi_Container::getContainer();
+		}
+
+		if ($kernel === NULL) {
+			$kernel = Metrofw_Kernel::getKernel($container);
 		}
 
 		$url = $request->requestedUrl;
@@ -91,7 +98,7 @@ class Metrofw_Router {
 			}
 		}
 
-		$rules = _get('route_rules');
+		$rules = $container->get('route_rules');
 		if ($rules) {
 			foreach ($rules as $pattern => $params) {
 				$listPat = explode('/', $pattern);
@@ -114,7 +121,7 @@ class Metrofw_Router {
 				}
 
 				$request->isRouted = TRUE;
-				_iCanHandle('process',  $request->appName.'/'.$request->modName.'.php::'.$request->actName.'Action');
+				$kernel->iCanHandle('process',  $request->appName.'/'.$request->modName.'.php::'.$request->actName.'Action');
 				return;
 			}
 /*
@@ -136,7 +143,7 @@ class Metrofw_Router {
 
 		$parts = explode('/', $url);
 		if (!isset($parts[1]) || $parts[1] == '') {
-			$parts[1] = _get('main_module', 'main');
+			$parts[1] = $container->get('main_module', 'main');
 		}
 
 		$default = 'main';
@@ -153,8 +160,8 @@ class Metrofw_Router {
 		$request->modName = $default;
 		$request->actName = $parts[2];
 
-		_iCanHandle('process',  $request->appName.'/'.$request->modName.'.php::process');
-		_iCanHandle('process',  $request->appName.'/'.$request->modName.'.php::'.$request->actName.'Action');
+		$kernel->iCanHandle('process',  $request->appName.'/'.$request->modName.'.php::process');
+		$kernel->iCanHandle('process',  $request->appName.'/'.$request->modName.'.php::'.$request->actName.'Action');
 	}
 
 	public function unrouteUrl($app) {
