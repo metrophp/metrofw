@@ -96,12 +96,12 @@ class Metrofw_Template {
 			if (is_array($content)) {
 				$html = '';
 				foreach ($content as $c) {
-					$html .= $this->transformContent($c);
+					$html .= $this->transformContent($c, $request);
 				}
 				echo $html;
 				return;
 			} else {
-				echo $this->transformContent($content);
+				echo $this->transformContent($content, $request);
 				return;
 			}
 		}
@@ -159,7 +159,7 @@ class Metrofw_Template {
 		 */
 	}
 
-	public function transformContent($content) {
+	public function transformContent($content, $request) {
 		//we have some special output,
 		// could be text, could be object
 		if (!is_object($content))
