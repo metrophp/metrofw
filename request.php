@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * The Request object is responsible for modeling
+ * most of the _SERVER vars and other things about
+ * the execution environment.
+ */
 class Metrofw_Request {
 
 	public $vars           = array();

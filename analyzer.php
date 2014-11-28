@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * The Analyzer analyzes the incoming _SERVER vars and
+ * and sets up the request object.
+ */
 class Metrofw_Analyzer {
 
 	public function analyze($request) {
