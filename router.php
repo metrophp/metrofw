@@ -210,7 +210,7 @@ function m_appurl($url='', $args=null, $https=-1) {
 		$baseUri = _get('appuri');
 	}
 
-	$router = _getMeA('router');
+	$router = _make('router');
 	$url  = $router->unrouteUrl($url);
 	$url .= $router->formatArgs($args);
 	$end  = $baseUri.$url;
@@ -237,7 +237,7 @@ function m_pageurl($url, $args=null, $https=-1) {
 		$baseUri = _get('appuri');
 	}
 
-	$router = _getMeA('router');
+	$router = _make('router');
 	// *
 	$url  = $router->unrouteUrl($url);
 	$url .= $router->formatArgs($args);
