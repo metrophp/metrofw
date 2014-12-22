@@ -28,7 +28,9 @@ class Metrofw_Analyze_sapi_cgi {
 			$script_parts = explode("/",substr($_SERVER['SCRIPT_NAME'],1));
 			$front_controller_name  = array_pop($script_parts);
 			$request->script = $front_controller_name;
-			$base_path    .= implode('/', $script_parts).'/';
+			if (count($script_parts)) {
+				$base_path    .= implode('/', $script_parts).'/';
+			}
 		}
 
 		$pathinfo_parts = explode("/", trim($pathinfo, '/'));
