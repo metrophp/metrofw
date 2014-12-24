@@ -103,7 +103,10 @@ class Metrofw_Analyze_sapi_cgi {
 			$script_parts = explode("/",substr($_SERVER['SCRIPT_NAME'],1));
 			$front_controller_name  = array_pop($script_parts);
 
-			$base_path   .= implode('/', $script_parts).'/';
+			if (count($script_parts)) { 
+				$base_path   .= implode('/', $script_parts).'/';
+			}
+
 			//determine PATH_INFO
 			$pathinfo = str_replace($base_path, '', $_SERVER['REQUEST_URI']);
 			$pathinfo = str_replace($front_controller_name, '', $pathinfo);
