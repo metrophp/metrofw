@@ -111,7 +111,7 @@ class Metrofw_Analyze_sapi_cgi {
 			//if base_path == '/', we don't want to strip all slashes,
 			// we just want to remove $base_path
 			//$pathinfo = str_replace($base_path, '', $_SERVER['REQUEST_URI']);
-			$pathinfo = substr($_SERVER['REQUEST_URI'], count($base_path));
+			$pathinfo = substr($_SERVER['REQUEST_URI'], strlen($base_path));
 			$pathinfo = str_replace($front_controller_name, '', $pathinfo);
 			//remove query string
 			if (strpos($pathinfo, '?') !== FALSE) {
