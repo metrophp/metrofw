@@ -10,7 +10,7 @@ Installation
 Use metrophp/metroproject to get a base file strucutre and composer dependency.
 ```
   git clone https://github.com/metrophp/metroproject.git
-  cd metroproject.git
+  cd metroproject
   rm -rf .git/
   composer install
   git init .
