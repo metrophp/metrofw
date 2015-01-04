@@ -61,7 +61,7 @@ In your template, add
 ```
 In your code (src/main/main.php) add
 ```php
-public function mainAction(request, response) {
+public function mainAction($request, $response) {
     $response->main = array('Hello,');
     $response->addTo('main', 'World');
 }
