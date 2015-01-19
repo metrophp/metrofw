@@ -2,10 +2,7 @@
 
 class Metrofw_Analyze_sapi_cgi {
 
-
 	public function analyze($request) {
-		$params = $_REQUEST;
-		$get = $_GET;
 		$request->sapiType = 'cgi';
 
 		if (array_key_exists('PATH_INFO', $_SERVER) && $_SERVER['PATH_INFO'] != '') {
@@ -21,6 +18,9 @@ class Metrofw_Analyze_sapi_cgi {
 			$request->requestedUrl = $pathinfo;
 		}
 
+		$params = $_REQUEST;
+		$this->_parsePathInfo($request, $pathinfo, $params);
+
 		$front_controller_name  = '';
 		$base_path              = '/';
 		//remove index.php or admin.php if they are present at the end of REQUEST_URI
@@ -32,7 +32,40 @@ class Metrofw_Analyze_sapi_cgi {
 				$base_path    .= implode('/', $script_parts).'/';
 			}
 		}
+		// store the base URI in the template config area for template processing
+		$request->baseUri = $_SERVER['HTTP_HOST'].$base_path;
 
+		//
+		// if we are rewriting away the index.php, set rewwrite = TRUE
+		//
+		if (array_key_exists('REQUEST_URI', $_SERVER) && $_SERVER['REQUEST_URI']!='') {
+			if (strpos($_SERVER['REQUEST_URI'], $request->script) !== FALSE) {
+			$request->rewrite = FALSE;
+			}
+		}
+
+		$this->_parseAdmin($request);
+		//
+		// determine if ajax
+		// if X-Requested-With == 'XMLHttpRequest'
+		//
+		$this->_parseAjax($request);
+	}
+
+	/**
+	 * Determine if the request is for 
+	 * the admin section
+	 */
+	public function _parseAdmin($request) {
+		if ($request->script == 'admin.php') {
+			$request->isAdmin = TRUE;
+			$request->rewrite = FALSE;
+			$request->script  = 'admin.php';
+		}
+	}
+
+	public function _parsePathInfo($request, $pathinfo, $params) {
+		$get = $_GET;
 		$pathinfo_parts = explode("/", trim($pathinfo, '/'));
 
 		foreach($pathinfo_parts as $num=>$p) { 
@@ -53,31 +86,17 @@ class Metrofw_Analyze_sapi_cgi {
 				}
 			}
 		}
-
-		if (array_key_exists('REQUEST_URI', $_SERVER) && $_SERVER['REQUEST_URI']!='') { 		
-			if (strpos($_SERVER['REQUEST_URI'], $request->script) !== FALSE) {
-			$request->rewrite = FALSE;
-			}
-		}
-
-		$request->vars = $params;
-		$request->getvars = $get;
+		$request->vars     = $params;
+		$request->getvars  = $get;
 		$request->postvars = $_POST;
+	}
 
-		// get the base URI 
-		// store in the template config area for template processing
-		$request->baseUri = $_SERVER['HTTP_HOST'].$base_path;
-
-		if ($request->script == 'admin.php') {
-			$request->isAdmin = TRUE;
-			$request->rewrite = FALSE;
-			$request->script  = 'admin.php';
-		}
-
-		//
-		// determine if ajax
-		// if X-Requested-With == 'XMLHttpRequest'
-		//
+	/**
+	 * Analyze URL for xhr=true
+	 * Or $_SERVER for HTTP_X_REQUESTED_WITH
+	 * Set $request->isAjax = true
+	 */
+	public function _parseAjax($request) {
 		if (in_array( 'xhr', array_keys($request->vars),TRUE)
 			|| (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest')) {
 			$request->isAjax = TRUE;
