@@ -25,8 +25,9 @@ foreach ($lines as $k=>$v) {
 <pre>
 <?php
 foreach ($exception->getTrace() as $trace) {
+//TODO: don't print traces that don't have line/file
 printf (' %s %s %s '.PHP_EOL, $trace['class'], $trace['type'], $trace['function']);
-printf (' %s: %s '.PHP_EOL, $trace['line'], $trace['file']);
+printf (' %s: %s '.PHP_EOL, @$trace['line'], @$trace['file']);
 echo PHP_EOL;
 }
 ?>
