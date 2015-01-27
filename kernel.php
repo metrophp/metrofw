@@ -58,7 +58,7 @@ class Metrofw_Kernel {
 	public static function emit($signalName, $source, &$args=array()) {
 		$k = Metrofw_Kernel::getKernel();
 		$container = $k->container;
-		if (!empty($args) && count($args) == 0) {
+		if (empty($args) && count($args) == 0) {
 			$args['request']  = $container->make('request');
 			$args['response'] = $container->make('response');
 		}
