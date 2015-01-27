@@ -45,10 +45,11 @@ class Metrofw_Output {
 				header('Content-type: application/json');
 				echo json_encode($response->sectionList);
 				//stop HTML output
+			} else {
+				//enable partial HTML rendering
+				//TODO: remove hardcoded dependency?
+				Metrofw_Template::parseSection('main');
 			}
-			//enable partial HTML rendering
-			//TODO: remove hardcoded dependency?
-			Metrofw_Template::parseSection('main');
 		}
 	}
 
