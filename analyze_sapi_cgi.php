@@ -10,7 +10,7 @@ class Metrofw_Analyze_sapi_cgi {
 		} else {
 			//fix some broken PATH_INFO implementations
 			// these are usually broken if front controller script is hidden
-			$pathinfo = $this->makePathInfo();
+			$pathinfo = $this->makePathInfo(@$_SERVER['SCRIPT_NAME'], @$_SERVER['REQUEST_URI']);
 		}
 
 		if (array_key_exists('REQUEST_URI', $_SERVER) && $_SERVER['REQUEST_URI']!='') {
@@ -115,29 +115,28 @@ class Metrofw_Analyze_sapi_cgi {
 	 * Determine PATH_INFO if not provided.
 	 * @return String  PATH_INFO as determined by SCRIPT_NAME and REQUEST_URI
 	 */
-	public function makePathInfo() {
+	public function makePathInfo($scriptName, $requestUri) {
 		$pathinfo   = '';
-		$base_path  = '/';
-		if (array_key_exists('SCRIPT_NAME', $_SERVER)) {
-			$script_parts = explode("/",substr($_SERVER['SCRIPT_NAME'],1));
+		$basePath  = '';
+		$front_controller_name = '';
+		if ($scriptName != '') {
+			$script_parts = explode("/",substr($scriptName,1));
 			$front_controller_name  = array_pop($script_parts);
 
 			if (count($script_parts)) { 
-				$base_path   .= implode('/', $script_parts).'/';
+				$basePath   .= implode('/', $script_parts).'/';
 			}
-
-			//determine PATH_INFO
-			//if base_path == '/', we don't want to strip all slashes,
-			// we just want to remove $base_path
-			//$pathinfo = str_replace($base_path, '', $_SERVER['REQUEST_URI']);
-			$pathinfo = substr($_SERVER['REQUEST_URI'], strlen($base_path));
-			$pathinfo = str_replace($front_controller_name, '', $pathinfo);
-			//remove query string
-			if (strpos($pathinfo, '?') !== FALSE) {
-				$pathinfo = substr($pathinfo, 0, strpos($pathinfo, '?'));
-			}
-			$pathinfo = '/'.$pathinfo;
 		}
+
+		//determine PATH_INFO
+		//if base_path == '/', we don't want to strip all slashes,
+		$pathinfo = substr($requestUri, strlen($basePath));
+		$pathinfo = str_replace('/'.$front_controller_name, '', $pathinfo);
+		//remove query string
+		if (strpos($pathinfo, '?') !== FALSE) {
+			$pathinfo = substr($pathinfo, 0, strpos($pathinfo, '?'));
+		}
+		//$pathinfo = '/'.$pathinfo;
 		return $pathinfo;
 	}
 }
