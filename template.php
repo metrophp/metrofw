@@ -160,6 +160,12 @@ class Metrofw_Template {
 	}
 
 	public function transformContent($content, $request) {
+
+		//struct
+		if (is_array($content)) {
+			return implode(' ', array_values($content));
+		}
+
 		//we have some special output,
 		// could be text, could be object
 		if (!is_object($content))
