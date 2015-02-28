@@ -65,14 +65,15 @@ class Metrofw_Output {
 	/**
 	 * Set the HTTP status header again if output buffering is on
 	 */
-	public function hangup($request) {
-		$this->statusHeader($request);
+	public function hangup($response) {
+		$this->statusHeader($response);
 	}
 
 	public function statusHeader($response) {
 
 		//if no statusCode, set to 200
 		$code = $response->statusCode;
+
 		if (empty($code)) {
 			$response->statusCode = 200;
 		}
