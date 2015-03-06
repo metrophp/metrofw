@@ -146,6 +146,9 @@ class Metrofw_Kernel {
 
 	public function onException($ex) {
 		if (!$this->hasHandlers('exception')) {
+			$response = _make('response');
+			$response->statusCode = 500;
+			$this->_runLifeCycle('output');
 			echo($ex);
 		} else {
 			_set('last_exception', $ex);
@@ -171,7 +174,11 @@ class Metrofw_Kernel {
 		}
 
 		if (!$this->hasHandlers('exception')) {
+			$response = _make('response');
+			$response->statusCode = 500;
+			$this->_runLifeCycle('output');
 			echo ($errfile. ' ['.$errline.'] '.$errstr .' <br/> '.PHP_EOL);
+
 		} else {
 			_set('last_exception', new Exception($errfile. ' ['.$errline.'] '.$errstr , $errno));
 			$this->_runLifeCycle('exception');
