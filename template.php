@@ -202,7 +202,6 @@ class Metrofw_Template {
 		}
 		_set('template_section', $template_section);
 		$kernel->runLifecycle('template.'.$template_section);
-		return $args['output'];
 	}
 }
 
