@@ -50,7 +50,7 @@ class Metrofw_Response {
 		return false;
 	}
 
-	public function addUserMessage($msg, $type) {
+	public function addUserMessage($msg, $type='info') {
 		$k = 'sparkmsg';
 		$arr = array();
 		$arr['msg']  = $msg;
