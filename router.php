@@ -121,7 +121,12 @@ class Metrofw_Router {
 				}
 
 				$request->isRouted = TRUE;
-				$kernel->iCanHandle('process',  $request->appName.'/'.$request->modName.'.php::'.$request->actName.'Action');
+				$kernel->iCanHandle('analyze',      $request->appName.'/'.$request->modName.'.php');
+				$kernel->iCanHandle('resources',    $request->appName.'/'.$request->modName.'.php');
+				$kernel->iCanHandle('authorize',    $request->appName.'/'.$request->modName.'.php');
+				$kernel->iCanHandle('process',      $request->appName.'/'.$request->modName.'.php::'.$request->actName.'Action');
+				$kernel->iCanHandle('output',       $request->appName.'/'.$request->modName.'.php', 1);
+				$kernel->iCanHandle('hangup',       $request->appName.'/'.$request->modName.'.php');
 				return;
 			}
 /*
@@ -160,8 +165,12 @@ class Metrofw_Router {
 		$request->modName = $default;
 		$request->actName = $parts[2];
 
-		$kernel->iCanHandle('process',  $request->appName.'/'.$request->modName.'.php::process');
-		$kernel->iCanHandle('process',  $request->appName.'/'.$request->modName.'.php::'.$request->actName.'Action');
+		$kernel->iCanHandle('analyze',      $request->appName.'/'.$request->modName.'.php');
+		$kernel->iCanHandle('resources',    $request->appName.'/'.$request->modName.'.php');
+		$kernel->iCanHandle('authorize',    $request->appName.'/'.$request->modName.'.php');
+		$kernel->iCanHandle('process',      $request->appName.'/'.$request->modName.'.php::'.$request->actName.'Action');
+		$kernel->iCanHandle('output',       $request->appName.'/'.$request->modName.'.php', 1);
+		$kernel->iCanHandle('hangup',       $request->appName.'/'.$request->modName.'.php');
 	}
 
 	public function unrouteUrl($app) {
