@@ -16,6 +16,7 @@ class Metrofw_Request {
 	public $rewrite        = TRUE;
 	public $unauthorized   = FALSE;
 	public $requestedUrl   = '';
+	public $baseUri        = '';
 	public $moduleName     = '';
 	public $serviceName    = '';
 	public $eventName      = '';
