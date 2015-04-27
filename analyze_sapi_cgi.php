@@ -14,8 +14,11 @@ class Metrofw_Analyze_sapi_cgi {
 		}
 
 		if (array_key_exists('REQUEST_URI', $_SERVER) && $_SERVER['REQUEST_URI']!='') {
-			$request->requestedUrl = $_SERVER['REQUEST_URI'];
+//			$request->requestedUrl = $_SERVER['REQUEST_URI'];
 			$request->requestedUrl = $pathinfo;
+		}
+		if (array_key_exists('REQUEST_METHOD', $_SERVER) && $_SERVER['REQUEST_METHOD']!='') {
+			$request->method = $_SERVER['REQUEST_METHOD'];
 		}
 
 		$params = $_REQUEST;

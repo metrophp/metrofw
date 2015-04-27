@@ -15,6 +15,7 @@ class Metrofw_Request {
 	public $isRouted       = FALSE;
 	public $rewrite        = TRUE;
 	public $unauthorized   = FALSE;
+	public $method         = '';
 	public $requestedUrl   = '';
 	public $baseUri        = '';
 	public $moduleName     = '';
@@ -76,6 +77,10 @@ class Metrofw_Request {
 	 */
 	public function getSession() {
 		return _make('session');
+	}
+
+	public function getMethod() {
+		return $this->method;
 	}
 
 	/**
