@@ -100,10 +100,14 @@ class Metrofw_Kernel {
 	public function _runLifeCycle($cycle) {
 		while ($svc = $this->whoCanHandle($cycle)) {
 
-			if (!is_callable($svc)) {
-				continue;
+			if (is_object($svc[0]) && ($svc[0] instanceof Closure)) {
+				$method = new ReflectionFunction($svc[0]);
+			} else {
+				if (!is_callable($svc)) {
+					continue;
+				}
+				$method = new ReflectionMethod($svc[0], $svc[1]);
 			}
-			$method = new ReflectionMethod($svc[0], $svc[1]);
 			$params = $method->getParameters();
 			$args   = array();
 			foreach ($params as $k=>$v) {
@@ -129,7 +133,12 @@ class Metrofw_Kernel {
 
 				$args[] = $value;
 			}
-			$method->invokeArgs($svc[0], $args);
+
+			if ($method->getName() == '{closure}') {
+				$method->invokeArgs($args);
+			} else {
+				$method->invokeArgs($svc[0], $args);
+			}
 		}
 	}
 /*

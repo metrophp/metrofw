@@ -113,6 +113,19 @@ class Metrofw_Tests_Kernel extends PHPUnit_Framework_TestCase {
 		$this->assertSame( $param1, $stub->param );
 	}
 
+	public function test_lifecycles_can_use_closures() {
+		$output = '';
+		$k = $this->kernel;
+
+		$k->iCanHandle('closure_test', function() use(&$output) {
+			$output .= 'inside closure';
+		});
+
+		$k->runLifecycle('closure_test');
+
+		$this->assertEquals( 'inside closure', $output );
+	}
+
 	public function test_has_handlers() {
 		$k = $this->kernel;
 		$stub = new Metrofw_Tests_Kernel_Handler();
