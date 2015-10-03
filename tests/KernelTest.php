@@ -9,16 +9,25 @@ class Metrofw_Tests_Kernel extends PHPUnit_Framework_TestCase {
 		$this->kernel = new Metrofw_Kernel(Metrodi_Container::getContainer());
 	}
 
+	public function test_empty_ctor_makes_di_container() {
+		$k = new Metrofw_Kernel();
+		$this->assertTrue( is_object($k->container) );
+		$this->assertEquals('metrodi_container', strtolower(get_class($k->container)));
+	}
+
 	public function test_signal_params_are_mutable() {
 		_iCanHandle('Fire', array($this, 'evtHandler'));
 		_iCanHandle('Fire_post', array($this, 'evtPostHandler'));
+		_iCanHandle('Fire_pre', array($this, 'evtPreHandler'));
 		$x = 1;
 		$y = 'a';
+		$z = 'z';
 		$args = array($x, $y);
 		$result = Metrofw_Kernel::emit('Fire', $this, $args);
 		$this->assertTrue($result);
 		$this->assertEquals( $args[0], 2);
 		$this->assertEquals( $args[1], 'z');
+		$this->assertEquals( $args[2], 'q');
 	}
 
 	public function test_signal_default_params_are_request_response() {
@@ -37,6 +46,11 @@ class Metrofw_Tests_Kernel extends PHPUnit_Framework_TestCase {
 		return TRUE;
 	}
 
+	public function evtPreHandler($evt, &$args) {
+		$args[2] = 'q';
+		return TRUE;
+	}
+
 	public function evtArgumentHandler($evt, &$args) {
 		//objects should be proto objs with $thing == 'request' and 'response'
 		if (is_object($args['request'])) {
@@ -49,11 +63,25 @@ class Metrofw_Tests_Kernel extends PHPUnit_Framework_TestCase {
 
 	public function test_skip_bad_handlers() {
 		_iCanHandle('testphase1', 'non/existant.php');
-		_iCanHandle('testphase1', 'non/existant2.php');
+		_iCanHandle('testphase1', 'non/existant2.php', 3);
 		$k = Metrofw_Kernel::getKernel();
 		while ($svc = $k->whoCanHandle('testphase1')) {
 			$this->assertFail(true);
 		}
+	}
+
+	public function test_has_handlers_works() {
+		$k = Metrofw_Kernel::getKernel();
+
+		$this->assertFalse( $k->hasHandlers('testphase3') );
+		$k->iCanHandle('testphase3', function() { return TRUE;}, 3);
+		$this->assertTrue( $k->hasHandlers('testphase3') );
+
+		$this->assertFalse( $k->hasHandlers('testphase4') );
+		$k->iCanHandle('testphase4', function() { return TRUE;}, 1);
+		$this->assertTrue( $k->hasHandlers('testphase4') );
+
+//		$this->assertEquals( 1, $count );
 	}
 
 	/**
