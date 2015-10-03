@@ -207,8 +207,7 @@ class Metrofw_Kernel {
 			(isset($this->serviceList[$service]) &&
 			is_array($this->serviceList[$service]) &&
 			count($this->serviceList[$service]) > 0)
-			||
-			(isset($this->serviceList[$post]) &&
+			|| (isset($this->serviceList[$post]) &&
 			is_array($this->serviceList[$post]) &&
 			count($this->serviceList[$post]) > 0)
 			);
