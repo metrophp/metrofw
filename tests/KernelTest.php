@@ -21,6 +21,12 @@ class Metrofw_Tests_Kernel extends PHPUnit_Framework_TestCase {
 		$this->assertEquals( $args[1], 'z');
 	}
 
+	public function test_signal_default_params_are_request_response() {
+		_iCanHandle('ArgumentTest', array($this, 'evtArgumentHandler'));
+		$result = Metrofw_Kernel::emit('ArgumentTest', $this);
+		$this->assertTrue($result);
+	}
+
 	public function evtHandler($evt, &$args) {
 		$args[0] = 2;
 		return TRUE;
@@ -29,6 +35,16 @@ class Metrofw_Tests_Kernel extends PHPUnit_Framework_TestCase {
 	public function evtPostHandler($evt, &$args) {
 		$args[1] = 'z';
 		return TRUE;
+	}
+
+	public function evtArgumentHandler($evt, &$args) {
+		//objects should be proto objs with $thing == 'request' and 'response'
+		if (is_object($args['request'])) {
+			if (is_object($args['response'])) {
+				return TRUE;
+			}
+		}
+		return FALSE;
 	}
 
 	public function test_skip_bad_handlers() {
