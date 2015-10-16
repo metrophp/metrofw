@@ -57,7 +57,11 @@ class Metrofw_Kernel {
 	 */
 	public static function emit($signalName, $source, &$args=array()) {
 		$k = Metrofw_Kernel::getKernel();
-		$container = $k->container;
+		return $k->signal($signalName, $source, $args);
+	}
+
+	public function signal($signalName, $source, &$args=array()) {
+		$container = $this->container;
 		if (empty($args) && count($args) == 0) {
 			$args['request']  = $container->make('request');
 			$args['response'] = $container->make('response');
@@ -66,19 +70,19 @@ class Metrofw_Kernel {
 		$signal->set('source', $source);
 		$signal->set('name',   $signalName);
 		$continue = true;
-		while ($svc = $k->whoCanHandle($signalName.'_pre')) {
+		while ($svc = $this->whoCanHandle($signalName.'_pre')) {
 			if (is_callable($svc))
 			$continue = $svc[0]->{$svc[1]}($signal, $args);
 			if (!$continue);break;
 		}
 
-		while ($svc = $k->whoCanHandle($signalName)) {
+		while ($svc = $this->whoCanHandle($signalName)) {
 			if (is_callable($svc))
 			$continue = $svc[0]->{$svc[1]}($signal, $args);
 			if (!$continue);break;
 		}
 
-		while ($svc = $k->whoCanHandle($signalName.'_post')) {
+		while ($svc = $this->whoCanHandle($signalName.'_post')) {
 			if (is_callable($svc))
 			$continue = $svc[0]->{$svc[1]}($signal, $args);
 			if (!$continue);break;
@@ -110,6 +114,7 @@ class Metrofw_Kernel {
 			}
 			$params = $method->getParameters();
 			$args   = array();
+
 			foreach ($params as $k=>$v) {
 				$value = NULL;
 				$thing = $v->name; //assume untyped parameter
