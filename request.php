@@ -25,6 +25,8 @@ class Metrofw_Request {
 	public $isAjax         = FALSE;
 	public $prodEnv        = 'prod';
 	public $statusCode     = '200';
+	public $remoteAddr     = '';
+	public $ssl            = '';
 
 	public $appUrl         = '';
 	public $appName        = 'main';

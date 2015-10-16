@@ -3,6 +3,8 @@
 class Metrofw_Analyze_sapi_cgi {
 
 	public function analyze($request) {
+		$this->setIpHeaders($request);
+
 		$request->sapiType = 'cgi';
 
 		if (array_key_exists('PATH_INFO', $_SERVER) && $_SERVER['PATH_INFO'] != '') {
@@ -141,5 +143,34 @@ class Metrofw_Analyze_sapi_cgi {
 		}
 		//$pathinfo = '/'.$pathinfo;
 		return $pathinfo;
+	}
+
+	public function setIpHeaders($request) {
+
+		if (array_key_exists('REMOTE_ADDR', $_SERVER)) {
+			$request->remoteAddr = $_SERVER['REMOTE_ADDR'];
+		}
+
+		if (array_key_exists('X_FORWARDED_FOR', $_SERVER)) {
+			$list = explode(',', $_SERVER['X_FORWARDED_FOR'].',');
+			$request->remoteAddr = $list[0];
+		}
+
+		if (array_key_exists('HTTPS', $_SERVER)) {
+			$request->ssl = 'on';
+		}
+
+		if (array_key_exists('X_FORWARDED_PROTO', $_SERVER)) {
+			$request->ssl = (strtolower($_SERVER['X_FORWARDED_PROTO']) == 'https') ? 'on': '';
+		}
+	}
+
+	public function setAppEnv($request) {
+		$request->prodEnv = _get('env');
+
+		if ($request->prodEnv == '' &&
+		    array_key_exists('APPLICATION_ENV', $_SERVER)) {
+			$request->prodEnv = $_SERVER['APPLICATION_ENV'];
+		}
 	}
 }
