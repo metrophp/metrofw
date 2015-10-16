@@ -197,12 +197,15 @@ class Metrofw_Router {
  * Build a URL the same way this router analyzes one.
  */
 function m_url($https=0) {
-	static $baseuri;
+	static $baseuri, $request;
 	if (!$baseuri) {
 		$baseuri = _get('baseuri');
 	}
+	if (!$request) {
+		$request = _make('request');
+	}
 
-	if ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']== 'on') || $https>0) {
+	if ($request->ssl || $https>0) {
 		return 'https://'.$baseuri;
 	} else {
 		return 'http://'.$baseuri;
@@ -215,8 +218,12 @@ function m_appurl($url='', $args=null, $https=-1) {
 	static $baseUri;
 	static $templateName;
 	static $templatePath;
+	static $request;
 	if (!$baseUri) {
 		$baseUri = _get('appuri');
+	}
+	if (!$request) {
+		$request = _make('request');
 	}
 
 	$router = _make('router');
@@ -229,7 +236,7 @@ function m_appurl($url='', $args=null, $https=-1) {
 
 	if ($https === 0) {
 		return 'http://'.$end;
-	} else if ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') || $https>0) {
+	} else if ($request->ssl || $https>0) {
 		return 'https://'.$end;
 	} else {
 		return 'http://'.$end;
@@ -242,8 +249,12 @@ function m_pageurl($url, $args=null, $https=-1) {
 	static $baseUri;
 	static $templateName;
 	static $templatePath;
+	static $request;
 	if (!$baseUri) {
 		$baseUri = _get('appuri');
+	}
+	if (!$request) {
+		$request = _make('request');
 	}
 
 	$router = _make('router');
@@ -255,7 +266,7 @@ function m_pageurl($url, $args=null, $https=-1) {
 
 	if ($https === 0) {
 		return 'http://'.$end;
-	} else if ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') || $https>0) {
+	} else if ($request->ssl || $https>0) {
 		return 'https://'.$end;
 	} else {
 		return 'http://'.$end;

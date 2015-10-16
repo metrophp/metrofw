@@ -215,6 +215,7 @@ function m_turl($https=-1) {
 	static $baseUri;
 	static $templateName;
 	static $templatePath;
+	static $request;
 
 	if (!$baseUri) {
 		$baseUri = _get('baseuri');
@@ -225,11 +226,14 @@ function m_turl($https=-1) {
 	if (!$templateName) {
 		$templateName = _get('template_name');
 	}
+	if (!$request) {
+		$request = _make('request');
+	}
 	$end = $baseUri.$templatePath.$templateName.'/';
 
 	if ($https === 0) {
 		return 'http://'.$end;
-	} else if ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') || $https>0) {
+	} else if ($request->ssl || $https>0) {
 		return 'https://'.$end;
 	} else {
 		return 'http://'.$end;
