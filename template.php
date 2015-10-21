@@ -43,12 +43,10 @@ class Metrofw_Template {
 		$templateName = _get('template_name', 'webapp01');
 		_set('template_name', $templateName);
 		$this->baseDir  = _get('template_basedir', 'local/templates/');
-		$this->baseUrl  = _get('template_baseuri', 'local/templates/');
-
+		$this->baseUri  = _get('template_baseuri', 'local/templates/');
 
 		_set('baseuri', $request->baseUri);
 
-		$templateName = _get('template_name');
 		$this->parseTemplate($request, $response, $templateName, $user, $layout);
 	}
 
@@ -81,14 +79,20 @@ class Metrofw_Template {
 	/**
 	 * If response->$section exists, print it
 	 * else, see if there is a template file.
+	 *
+	 * This function looks for an array key in the $response object
+	 * If an object is found this tries to call: toHtml, toString, __toString
+	 * against the object.
+	 *
+	 * Otherwise, a file is included from one of the following locations:
+	 *
+	 * templates/webapp01/views/appName/modName_actName.html.php
+	 * (template_basedir)/(template_name)/views/($appName)/($modName)_($actName).html.php
+	 *
+	 * src/($appName)/views/($modName)_($actName).html.php
+	 * local/($appName)/views/($modName)_($actName).html.php
 	 */
-	//public function template($signal, &$args) {
 	public function template($request, $response, $template_section) {
-/*
-		$sect     = str_replace('template.', '', $args['template_section']);
-		$response = $args['response'];
-		$request  = $args['request'];
-*/
 		$sect     = str_replace('template.', '', $template_section);
 
 		if ($response->has($sect)) {
@@ -105,18 +109,20 @@ class Metrofw_Template {
 				return;
 			}
 		}
+
 		//we don't have a section in the response
 		//let's include the template.main.file if the section is "main".
 		if ($sect != 'main') return;
+
 		$filesep = '/';
 		//$subsection = substr($args['template_section'], strpos($args['template_section'], '.')+1);
 		$subsection = substr($template_section, strpos($template_section, '.')+1);
 		$viewFile = _get('template.main.file', $request->modName.'_'.$request->actName).'.html.php';
 		$fileChoices = array();
-		$fileChoices[] = $this->baseDir.'view'.$filesep.$viewFile;
-		$fileChoices[] = 'local'.
-				$filesep.$request->appName. $filesep . 'views'. $filesep . $viewFile;
+		$fileChoices[] = $this->baseDir._get('template_name').$filesep.'views'.$filesep.$request->appName.$filesep.$viewFile;
 		$fileChoices[] = 'src'  .
+				$filesep.$request->appName. $filesep . 'views'. $filesep . $viewFile;
+		$fileChoices[] = 'local'.
 				$filesep.$request->appName. $filesep . 'views'. $filesep . $viewFile;
 
 		ob_start();
@@ -136,27 +142,6 @@ class Metrofw_Template {
 			_iCanHandle('template.main', 'metrofw/terrors.php');
 		}
 		echo ob_get_contents() . substr( ob_end_clean(), 0, 0);
-		//$args['output'] .= ob_get_contents() . substr( ob_end_clean(), 0, 0);
-
-		/*
-		//we have some special output,
-		// could be text, could be object
-		if (!is_object($request->output))
-			return $request->output;
-
-		//it's an object
-		if (method_exists( $request->output, 'toHtml' )) {
-			return call_user_func_array(array($request->output, 'toHtml'), array($request));
-		}
-
-		if (method_exists( $request->output, 'toString' )) {
-			return call_user_func_array(array($request->output, 'toString'), array($request));
-		}
-
-		if (method_exists( $request->output, '__toString' )) {
-			return call_user_func_array(array($request->output, '__toString'), array($request));
-		}
-		 */
 	}
 
 	public function transformContent($content, $request) {
