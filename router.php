@@ -57,13 +57,15 @@ class Metrofw_Router {
 			$default = 'admin';
 		}
 
-		_iCanHandle('analyze',       $parts[1].'/'.$default.'.php');
-		_iCanHandle('resources',     $parts[1].'/'.$default.'.php');
-		_iCanHandle('authenticate',  $parts[1].'/'.$default.'.php');
-		_iCanHandle('authorize',     $parts[1].'/'.$default.'.php');
-		_iCanHandle('process',       $parts[1].'/'.$default.'.php');
-		_iCanHandle('output',        $parts[1].'/'.$default.'.php');
-		_iCanHandle('hangup',        $parts[1].'/'.$default.'.php');
+		if (_get('auto_route_to_main', TRUE)) {
+			_iCanHandle('analyze',       $parts[1].'/'.$default.'.php');
+			_iCanHandle('resources',     $parts[1].'/'.$default.'.php');
+			_iCanHandle('authenticate',  $parts[1].'/'.$default.'.php');
+			_iCanHandle('authorize',     $parts[1].'/'.$default.'.php');
+			_iCanHandle('process',       $parts[1].'/'.$default.'.php');
+			_iCanHandle('output',        $parts[1].'/'.$default.'.php');
+			_iCanHandle('hangup',        $parts[1].'/'.$default.'.php');
+		}
 
 		_iCanHandle('analyze',  'metrofw/router.php::autoRoute', 3);
 	}
