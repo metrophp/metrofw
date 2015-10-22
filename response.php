@@ -38,6 +38,23 @@ class Metrofw_Response {
 		$this->sectionList[$k][] = $v;
 	}
 
+	public function addInto($k, $v) {
+		if (!is_array($v)) {
+			$this->addTo($k, $v);
+			return;
+		}
+		if (!@is_array($this->sectionList[$k])) {
+			if (isset($this->sectionList[$k])) {
+				$oldv = $this->sectionList[$k];
+				$this->sectionList[$k] = array();
+				$this->sectionList[$k][] = $oldv;
+			} else {
+				$this->sectionList[$k] = array();
+			}
+		}
+		$this->sectionList[$k] = array_merge($this->sectionList[$k], $v);
+	}
+
 	public function get($k) {
 		if (isset($this->sectionList[$k]))
 			return $this->sectionList[$k];
