@@ -4,6 +4,7 @@ class Metrofw_Analyze_sapi_cgi {
 
 	public function analyze($request) {
 		$this->setIpHeaders($request);
+		$this->setAppEnv($request);
 
 		$request->sapiType = 'cgi';
 
