@@ -35,9 +35,12 @@ class Metrofw_Template {
 	 * else, toString is called, if available, 
 	 * else, __toString is called, if available.
 	 *  
-	 * The output is returned.
+	 * The output is echoed.
 	 */
 	public function output($request, $response, $user) {
+		if (isset($response->redir)) {
+			return;
+		}
 		$layout = _get('template_layout', 'index');
 
 		$templateName = _get('template_name', 'webapp01');
