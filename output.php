@@ -3,7 +3,7 @@
 class Metrofw_Output {
 
 	public function resources($request) {
-		if (strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gz')!==FALSE) {
+		if (strpos($request->header('HTTP_ACCEPT_ENCODING'), 'gz')!==FALSE) {
 			ob_start('ob_gzhandler');
 		} else {
 			ob_start();

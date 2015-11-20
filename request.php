@@ -85,6 +85,13 @@ class Metrofw_Request {
 		return $this->method;
 	}
 
+	public function header($h) {
+		if (array_key_exists($h, $_SERVER)) {
+			return $_SERVER[$h];
+		}
+		return NULL;
+	}
+
 	/**
 	 * removes effects of Magic Quotes GPC
 	 */
