@@ -19,20 +19,26 @@ class Metrofw_Output {
 	public function output($request, $response, $session) {
 
 		$this->statusHeader($response);
-		if (isset($response->redir)) {
+		if (isset($response->redir) || $request->isAjax) {
 			$msg  = $response->get('sparkmsg');
 			$session->set('sparkmsg', $msg);
+		}
+
+		if (isset($response->redir)) {
 			$this->redir($response);
 			return;
 		}
 
-		$msg  = $session->get('sparkmsg');
+		//only clear session messages on a full page display
+		if (!$request->isAjax) {
+			$msg  = $session->get('sparkmsg');
 
-		if (!empty($msg)) {
-			foreach ($msg as $_m) {
-				$response->addTo('sparkmsg', $_m);
+			if (!empty($msg)) {
+				foreach ($msg as $_m) {
+					$response->addTo('sparkmsg', $_m);
+				}
+				$session->clear('sparkmsg');
 			}
-			$session->clear('sparkmsg');
 		}
 
 		if ($request->isAjax) {
