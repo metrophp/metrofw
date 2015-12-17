@@ -73,19 +73,19 @@ class Metrofw_Kernel {
 		while ($svc = $this->whoCanHandle($signalName.'_pre')) {
 			if (is_callable($svc))
 			$continue = $svc[0]->{$svc[1]}($signal, $args);
-			if (!$continue);break;
+			if (!$continue) {break;}
 		}
 
 		while ($svc = $this->whoCanHandle($signalName)) {
 			if (is_callable($svc))
 			$continue = $svc[0]->{$svc[1]}($signal, $args);
-			if (!$continue);break;
+			if (!$continue) {break;}
 		}
 
 		while ($svc = $this->whoCanHandle($signalName.'_post')) {
 			if (is_callable($svc))
 			$continue = $svc[0]->{$svc[1]}($signal, $args);
-			if (!$continue);break;
+			if (!$continue) {break;}
 		}
 
 		return $continue;
