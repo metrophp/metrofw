@@ -7,6 +7,7 @@ class Metrofw_Kernel {
 
 	public $container        = NULL;
 	public $serviceList      = array();
+	public $cycleStack       = array();
 
 	/**
 	 * Cache reference
@@ -102,6 +103,7 @@ class Metrofw_Kernel {
 	}
 
 	public function _runLifeCycle($cycle) {
+		$this->cycleStack[] = $cycle;
 		while ($svc = $this->whoCanHandle($cycle)) {
 
 			if (is_object($svc[0]) && ($svc[0] instanceof Closure)) {
@@ -145,6 +147,13 @@ class Metrofw_Kernel {
 				$method->invokeArgs($svc[0], $args);
 			}
 		}
+		@array_pop($this->cycleStack);
+	}
+
+	public function currentCycle() {
+		$c = count($this->cycleStack);
+		if (!$c) return NULL;
+		return $this->cycleStack[ $c-1 ];
 	}
 /*
 	public function _runLifeCycle($cycle) {
@@ -191,7 +200,9 @@ class Metrofw_Kernel {
 		if (!$this->hasHandlers('exception')) {
 			$response = _make('response');
 			$response->statusCode = 500;
-			$this->_runLifeCycle('output');
+			if ($this->currentCycle() != 'output') {
+				$this->_runLifeCycle('output');
+			}
 			echo ($errfile. ' ['.$errline.'] '.$errstr .' <br/> '.PHP_EOL);
 			$count++;
 			//killswitch
