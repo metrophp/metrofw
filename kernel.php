@@ -183,6 +183,7 @@ class Metrofw_Kernel {
 	}
 
 	public function onError($errno, $errstr, $errfile, $errline, $errcontext=array()) {
+		static $count=0;
 		if (!($errno & error_reporting())) {
 			return TRUE;
 		}
@@ -192,7 +193,11 @@ class Metrofw_Kernel {
 			$response->statusCode = 500;
 			$this->_runLifeCycle('output');
 			echo ($errfile. ' ['.$errline.'] '.$errstr .' <br/> '.PHP_EOL);
-
+			$count++;
+			//killswitch
+			if ($count > 100) {
+				exit();
+			}
 		} else {
 			_set('last_exception', new Exception($errfile. ' ['.$errline.'] '.$errstr , $errno));
 			$this->_runLifeCycle('exception');
