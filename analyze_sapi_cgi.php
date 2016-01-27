@@ -154,7 +154,19 @@ class Metrofw_Analyze_sapi_cgi {
 
 		if (array_key_exists('X_FORWARDED_FOR', $_SERVER)) {
 			$list = explode(',', $_SERVER['X_FORWARDED_FOR'].',');
-			$request->remoteAddr = $list[0];
+			
+			//only trust local forwarders
+			//check ipv4 and v6 private net prefixes
+			$prefix = substr($request->remoteAddr, 0, 4);
+			if ($prefix     == '10.0'
+				||  $prefix == '172.'
+				||  $prefix == '192.'
+				||  $prefix == 'fe80'
+				||  substr($prefix, 0,2) == 'fd') {
+
+					$request->remoteAddr = $list[0];
+					$request->proxyAddr  = $_SERVER['REMOTE_ADDR'];
+			}
 		}
 
 		if (array_key_exists('HTTPS', $_SERVER)) {

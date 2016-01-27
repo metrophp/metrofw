@@ -26,6 +26,7 @@ class Metrofw_Request {
 	public $prodEnv        = 'prod';
 	public $statusCode     = '200';
 	public $remoteAddr     = '';
+	public $proxyAddr      = '';
 	public $ssl            = '';
 
 	public $appUrl         = '';
