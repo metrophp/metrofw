@@ -11,23 +11,20 @@ class Metrofw_Output {
 	}
 
 	/**
-	 * Set the HTTP status first, in case output buffering is not on.
+	 * If $response->redir is set, then reidrect to set location and return.
+	 * Next set the status header.
+	 * if the request is Ajax, don't call Template, just json_encode $response->sectionList
 	 *
 	 * save sparkmsg to session if redirecting
 	 * load sparkmsg from session if not redirecting
 	 */
 	public function output($request, $response, $session) {
 
-		$this->statusHeader($response);
-		if (isset($response->redir) || $request->isAjax) {
-			$msg  = $response->get('sparkmsg');
-			$session->set('sparkmsg', $msg);
-		}
-
 		if (isset($response->redir)) {
 			$this->redir($response);
 			return;
 		}
+		$this->statusHeader($response);
 
 		//only clear session messages on a full page display
 		if (!$request->isAjax) {
@@ -66,13 +63,23 @@ class Metrofw_Output {
 	public function redir($response) {
 //		echo 'You will be redirected here: <a href="'.$request->redir.'">'.$request->redir.'</a>';
 		header('Location: '.$response->redir);
+		$response->statusCode  = 302;
+		$this->statusHeader($response);
 	}
 
 	/**
 	 * Set the HTTP status header again if output buffering is on
+	 * Save any spark messages not unset by plugins
 	 */
-	public function hangup($response) {
+	public function hangup($response, $session) {
 		$this->statusHeader($response);
+
+		$msg  = $response->get('sparkmsg');
+		if (is_array($msg) && count($msg)) {
+			$sessionMsg  = (array)$session->get('sparkmsg');
+			$msg = array_merge($msg, $sessionMsg);
+			$session->set('sparkmsg', $msg);
+		}
 	}
 
 	public function statusHeader($response) {
