@@ -111,9 +111,17 @@ class Metrofw_Output {
 			break;
 
 			case 301:
+			header('HTTP/1.1 301 Moved Permanently');
+			break;
+
+			case 302:
+			header('HTTP/1.1 302 Moved Temporarily');
+			break;
+
+			case 304:
 			//cannot send any http body with 301, even gz header
 			ob_end_clean();
-			header('HTTP/1.1 301 Not Modified');
+			header('HTTP/1.1 304 Not Modified');
 			break;
 
 
