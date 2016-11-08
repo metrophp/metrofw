@@ -5,6 +5,9 @@ These metrofw libraries will give you things like a router and template parsing.
 dependency injection.
 
 
+[![PPM Compatible](https://raw.githubusercontent.com/php-pm/ppm-badge/master/ppm-badge.png)](https://github.com/php-pm/php-pm)
+
+
 Installation
 =======
 Use metrophp/metroproject to get a base file strucutre and composer dependency.
