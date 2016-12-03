@@ -40,13 +40,6 @@ class Metrofw_Router {
 			return;
 		}
 
-		if (strpos($url, '/hello') === 0) {
-			$request->appUrl  = 'hello';
-			$request->appName = 'hello';
-			_iCanOwn('output', 'example/helloworld.php');
-			return;
-		}
-
 		$parts = explode('/', $url);
 		if (!isset($parts[1]) || $parts[1] == '') {
 			$parts[1] = _get('main_module', 'main');
