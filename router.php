@@ -151,6 +151,11 @@ class Metrofw_Router {
 			$default = 'admin';
 		}
 
+		//allow action to be sent as part of forms
+		if ((!isset($parts[2]) || $parts[2] == '') && array_key_exists('action', $request->vars)) {
+			$parts[2] = $request->vars['action'];
+		}
+
 		if (!isset($parts[2]) || $parts[2] == '') {
 			$parts[2] = 'main';
 		}
