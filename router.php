@@ -5,15 +5,6 @@ class Metrofw_Router {
 	public $cycles = 0;
 
 	public function analyze($request) {
-
-/*
-		if ($request->requestedUrl == '' && $this->cycles == 0) {
-			$this->cycles++;
-			//let's stack ourselves at the end
-			_iCanHandle('analyze',  'metrofw/router.php');
-			return;
-		}
-*/
 		$url = $request->requestedUrl;
 
 		_set('baseuri', $request->baseUri);
@@ -26,9 +17,17 @@ class Metrofw_Router {
 		}
 
 
+		return $this->routeSpecial($request);
+	}
+
+	public function routeSpecial($request) {
+
+		$url = $request->requestedUrl;
+
 		if (strpos($url, '/dologin') === 0) {
 			$request->appUrl  = 'login';
 			$request->appName = 'login';
+			$request->isRouted = TRUE;
 			_iCanHandle('process', 'metrou/authenticator.php::login');
 			return;
 		}
@@ -36,37 +35,28 @@ class Metrofw_Router {
 		if (strpos($url, '/dologout') === 0) {
 			$request->appUrl  = 'logout';
 			$request->appName = 'logout';
+			$request->isRouted = TRUE;
 			_iCanHandle('authenticate', 'metrou/logout.php');
 			return;
 		}
 
-		$parts = explode('/', $url);
-		if (!isset($parts[1]) || $parts[1] == '') {
-			$parts[1] = _get('main_module', 'main');
-		}
-
-		$default = 'main';
-		if ($request->isAdmin) {
-			$default = 'admin';
-		}
-
-		if (_get('auto_route_to_main', TRUE)) {
-			_iCanHandle('analyze',       $parts[1].'/'.$default.'.php');
-			_iCanHandle('resources',     $parts[1].'/'.$default.'.php');
-			_iCanHandle('authenticate',  $parts[1].'/'.$default.'.php');
-			_iCanHandle('authorize',     $parts[1].'/'.$default.'.php');
-			_iCanHandle('process',       $parts[1].'/'.$default.'.php');
-			_iCanHandle('output',        $parts[1].'/'.$default.'.php');
-			_iCanHandle('hangup',        $parts[1].'/'.$default.'.php');
-		}
-
+		//@DEPRECATED
 		_iCanHandle('analyze',  'metrofw/router.php::autoRoute', 3);
 	}
 
 	/**
-	 * If nothing has routed the request try route_rules pattern matching or our best guess
+	 * Old method name, now runs default behavior if only request is not
+	 * already routed 
 	 */
 	public function autoRoute($request, $kernel=NULL, $container=NULL) {
+		if (!$request->isRouted) {
+			$this->routeRules($request, $kernel, $container);
+			$this->routeAppMain($request, $kernel, $container);
+		}
+	}
+
+
+	public function routeRules($request, $kernel=NULL, $container=NULL) {
 		if ($request->isRouted) {
 			return;
 		}
@@ -94,76 +84,82 @@ class Metrofw_Router {
 		}
 
 		$rules = $container->get('route_rules');
-		if ($rules) {
-			foreach ($rules as $pattern => $params) {
-				$listPat = explode('/', $pattern);
-				//remove initial /
-				array_shift($listPat);
+		if (!$rules) {
+			return;
+		}
 
-				//if pattern is longer, forget it
-				if (count($listPat) > count($listUrl)) continue;
+		$matched = $this->matchRequestRules($rules, $request, $listUrl);
 
-				foreach ($listPat as $_kPat => $_vPat) {
-					if ( substr($_vPat, 0, 1) === ':' ) {
-						$params[ substr($_vPat, 1) ] = $listUrl[$_kPat];
-					} else {
-						//ensure the pattern matches the url exactly
-						if ($listPat[ $_kPat ] != $listUrl[ $_kPat ]) continue 2;
-					}
-				}
-				foreach ($params as $_i => $_j) {
-					$request->set($_i, $_j);
-				}
+		//submitted action always overrides any rules
+		//because it is unlikely that anything in the provided rules
+		//maps to /app/module/action
+		if (array_key_exists('action', $request->vars)) {
+			$request->actName = $request->vars['action'];
+		}
 
-				$request->isRouted = TRUE;
-				$kernel->iCanHandle('analyze',      $request->appName.'/'.$request->modName.'.php');
-				$kernel->iCanHandle('resources',    $request->appName.'/'.$request->modName.'.php');
-				$kernel->iCanHandle('authorize',    $request->appName.'/'.$request->modName.'.php');
-				$kernel->iCanHandle('process',      $request->appName.'/'.$request->modName.'.php::'.$request->actName.'Action');
-				$kernel->iCanHandle('output',       $request->appName.'/'.$request->modName.'.php', 1);
-				$kernel->iCanHandle('hangup',       $request->appName.'/'.$request->modName.'.php');
-				return;
+
+		if ($matched) {
+			$request->isRouted = TRUE;
+			$kernel->iCanHandle('analyze',      $request->appName.'/'.$request->modName.'.php');
+			$kernel->iCanHandle('resources',    $request->appName.'/'.$request->modName.'.php');
+			$kernel->iCanHandle('authorize',    $request->appName.'/'.$request->modName.'.php');
+			$kernel->iCanHandle('process',      $request->appName.'/'.$request->modName.'.php::'.$request->actName.'Action');
+			$kernel->iCanHandle('output',       $request->appName.'/'.$request->modName.'.php', 1);
+			$kernel->iCanHandle('hangup',       $request->appName.'/'.$request->modName.'.php');
+		}
+	}
+
+	/**
+	 * Assume the first part of the URL is the application name
+	 * route module to main.php
+	 * check for "action" as second URL param
+	 * check for "action" in GET and POST vars, override param if found
+	 * route action to mainAction
+	 */
+	public function routeAppMain($request, $kernel=NULL, $container=NULL) {
+		if ($request->isRouted) {
+			return;
+		}
+
+		if ($container === NULL) {
+			$container = Metrodi_Container::getContainer();
+		}
+
+		if ($kernel === NULL) {
+			$kernel = Metrofw_Kernel::getKernel($container);
+		}
+
+		$url = $request->requestedUrl;
+		//remove initial /
+		$listUrl = explode('/', $url);
+		array_shift($listUrl);
+		//remove trailing slash
+		if (empty($listUrl [ (count($listUrl)-1) ])) {
+			array_pop($listUrl);
+		}
+		//remove /id=X/ from  URL
+		foreach ($listUrl as $_key => $_url) {
+			if (strpos($_url, '=') !== FALSE ) {
+				unset($listUrl[$_key]);
 			}
-/*
-			foreach ($rules as $pattern => $route ) {
-				$matches = array();
-				preg_match($pattern, $url, $matches);
-				if (count($matches)) {
-					for ($regexx=1; $regexx<=(count($matches)); $regexx++) {
-						foreach ($route as $_j => $_k) {
-							$request->set($_j, str_replace('$'.$regexx, $matches[($regexx-1)], $_k));
-						}
-					}
-					_iCanHandle('process',  $request->appName.'/'.$request->modName.'.php::'.$request->actName.'Action');
-					return;
-				}
-			}
-*/
 		}
 
-		$parts = explode('/', $url);
-		if (!isset($parts[1]) || $parts[1] == '') {
-			$parts[1] = $container->get('main_module', 'main');
+		$request->appName = $container->get('main_module', 'main');
+		$request->modName = 'main';
+		$request->actName = 'main';
+
+		if (isset($listUrl[0]) && $listUrl[0] !== '') {
+			$request->appName = $listUrl[0];
 		}
 
-		$default = 'main';
-		if ($request->isAdmin) {
-			$default = 'admin';
+		if (isset($listUrl[1]) && $listUrl[1] !== '') {
+			$request->actName = $listUrl[1];
 		}
 
-		//allow action to be sent as part of forms
-		if ((!isset($parts[2]) || $parts[2] == '') && array_key_exists('action', $request->vars)) {
-			$parts[2] = $request->vars['action'];
+		//allow override action to be sent as part of forms
+		if (array_key_exists('action', $request->vars)) {
+			$request->actName = $request->vars['action'];
 		}
-
-		if (!isset($parts[2]) || $parts[2] == '') {
-			$parts[2] = 'main';
-		}
-
-		$request->appName = $parts[1];
-		$request->appUrl  = $parts[1];
-		$request->modName = $default;
-		$request->actName = $parts[2];
 
 		$kernel->iCanHandle('analyze',      $request->appName.'/'.$request->modName.'.php');
 		$kernel->iCanHandle('resources',    $request->appName.'/'.$request->modName.'.php');
@@ -171,6 +167,49 @@ class Metrofw_Router {
 		$kernel->iCanHandle('process',      $request->appName.'/'.$request->modName.'.php::'.$request->actName.'Action');
 		$kernel->iCanHandle('output',       $request->appName.'/'.$request->modName.'.php', 1);
 		$kernel->iCanHandle('hangup',       $request->appName.'/'.$request->modName.'.php');
+
+	}
+
+	public function matchRequestRules($rules, $request, $listUrl) {
+
+		foreach ($rules as $pattern => $params) {
+			$listPat = explode('/', $pattern);
+			//remove initial /
+			array_shift($listPat);
+
+			//if pattern is longer, forget it
+			if (count($listPat) > count($listUrl)) continue;
+
+			foreach ($listPat as $_kPat => $_vPat) {
+				if ( substr($_vPat, 0, 1) === ':' ) {
+					$params[ substr($_vPat, 1) ] = $listUrl[$_kPat];
+				} else {
+					//ensure the pattern matches the url exactly
+					if ($listPat[ $_kPat ] != $listUrl[ $_kPat ]) continue 2;
+				}
+			}
+			foreach ($params as $_i => $_j) {
+				$request->set($_i, $_j);
+			}
+			return TRUE;
+		}
+		return FALSE;
+/*
+		foreach ($rules as $pattern => $route ) {
+			$matches = array();
+			preg_match($pattern, $url, $matches);
+			if (count($matches)) {
+				for ($regexx=1; $regexx<=(count($matches)); $regexx++) {
+					foreach ($route as $_j => $_k) {
+						$request->set($_j, str_replace('$'.$regexx, $matches[($regexx-1)], $_k));
+					}
+				}
+				_iCanHandle('process',  $request->appName.'/'.$request->modName.'.php::'.$request->actName.'Action');
+				return;
+			}
+		}
+*/
+
 	}
 
 	public function unrouteUrl($app) {
