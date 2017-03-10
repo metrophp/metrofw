@@ -53,6 +53,14 @@ class Metrofw_Template {
 		$this->parseTemplate($request, $response, $templateName, $user, $layout);
 	}
 
+	/**
+	 * Include $layout.".html.php" from $templateName folder.
+	 * If $layout.".html.php" is not available, fallback to index.html.php
+	 * If layout is not available throw an exception in development mode.
+	 * Otherwise, try to include server_error.html.php.  If that fails, an
+	 * empty 501 response will be returned, allowing for CGI intercept handling
+	 * to occur.
+	 */
 	public function parseTemplate($request, $response, $templateName, $user=NULL, $layout = 'index') {
 
 		$templateIncluded = FALSE;
@@ -61,8 +69,8 @@ class Metrofw_Template {
 		}
 
 		//try special style, if not fall back to index
-		if (!include( $this->baseDir. $templateName.'/'.$layout.'.html.php') ) {
-			if(include($this->baseDir. $templateName.'/index.html.php')) {
+		if (!@include( $this->baseDir. $templateName.'/'.$layout.'.html.php') ) {
+			if(@include($this->baseDir. $templateName.'/index.html.php')) {
 				$templateIncluded = TRUE;
 			}
 		} else {
@@ -70,12 +78,13 @@ class Metrofw_Template {
 		}
 
 		if (!$templateIncluded) {
-			$errors = array();
-			$errors[] = 'Cannot include template '.$templateName.'.';
 			$request->httpStatus = '501';
-			_set('output_errors', $errors);
-			_iCanHandle('output', 'metrofw/terrors.php');
-			return true;
+			if ($request->isDevelopment()) {
+				throw new \Exception('Cannot include template '. $templateName.'/'.$layout.'.html.php');
+			}
+			$response->addTo('errors', 'Cannot include template '.$templateName.'.');
+			@include($this->baseDir. $templateName.'/server_error.html.php');
+			return TRUE;
 		}
 	}
 
