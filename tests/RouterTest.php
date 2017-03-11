@@ -55,6 +55,7 @@ class Metrofw_Tests_Router extends PHPUnit_Framework_TestCase {
 
 		$this->container->set('route_rules', array());
 
+		/*
 		$this->container->set('route_rules', 
 			array_merge(array('/:appName'=>array( 'modName'=>'main', 'actName'=>'main' )),
 			_get('route_rules')));
@@ -66,9 +67,10 @@ class Metrofw_Tests_Router extends PHPUnit_Framework_TestCase {
 		$this->container->set('route_rules', 
 			array_merge(array('/:appName/:modName/:actName'=>array(  )),
 			_get('route_rules')));
+		 */
 
 		$this->container->set('route_rules', 
-			array_merge(array('/:appName/:modName/:actName/:arg'=>array(  )),
+			array_merge(array('/:appName/:modName/:actName/:arg'=>array( 'appName'=>'main', 'modName'=>'main', 'actName'=>'main' )),
 			_get('route_rules')));
 
 
@@ -101,6 +103,7 @@ class Metrofw_Tests_Router extends PHPUnit_Framework_TestCase {
 
 		$this->container->set('route_rules', array());
 
+		/*
 		$this->container->set('route_rules', 
 			array_merge(array('/:appName'=>array( 'modName'=>'main', 'actName'=>'main' )),
 			_get('route_rules')));
@@ -113,8 +116,9 @@ class Metrofw_Tests_Router extends PHPUnit_Framework_TestCase {
 			array_merge(array('/:appName/:modName/:actName'=>array(  )),
 			_get('route_rules')));
 
+		 */
 		$this->container->set('route_rules', 
-			array_merge(array('/:appName/:modName/:actName/:arg'=>array(  )),
+			array_merge(array('/:appName/:modName/:actName/:arg'=>array( 'appName'=>'main', 'modName'=>'main', 'actName'=>'main' )),
 			_get('route_rules')));
 
 
