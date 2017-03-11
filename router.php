@@ -177,17 +177,32 @@ class Metrofw_Router {
 			//remove initial /
 			array_shift($listPat);
 
-			//if pattern is longer, forget it
-			if (count($listPat) > count($listUrl)) continue;
+			$optionalCount = 0;
+			//colons represent optional parts of the URL pattern
+			//that set default values of request parameters.
+			//Count optional parts of url pattern
+			array_walk($listPat, function($item, $key) use(&$optionalCount) {
+				if ( substr($item, 0, 1) === ':' ) {
+					$optionalCount++;
+				}
+			});
+
+			//if static part of pattern is longer, skip this pattern
+			if (count($listPat)-$optionalCount > count($listUrl)) continue;
 
 			foreach ($listPat as $_kPat => $_vPat) {
-				if ( substr($_vPat, 0, 1) === ':' ) {
-					$params[ substr($_vPat, 1) ] = $listUrl[$_kPat];
+				//colons represent optional parts of the URL pattern
+				//that set default values of request parameters
+				if ( substr($_vPat, 0, 1) === ':') {
+					if (array_key_exists($_kPat, $listUrl)) {
+						$params[ substr($_vPat, 1) ] = $listUrl[$_kPat];
+					}
 				} else {
 					//ensure the pattern matches the url exactly
 					if ($listPat[ $_kPat ] != $listUrl[ $_kPat ]) continue 2;
 				}
 			}
+			//set params as part of the request
 			foreach ($params as $_i => $_j) {
 				$request->set($_i, $_j);
 			}
@@ -204,7 +219,7 @@ class Metrofw_Router {
 						$request->set($_j, str_replace('$'.$regexx, $matches[($regexx-1)], $_k));
 					}
 				}
-				_iCanHandle('process',  $request->appName.'/'.$request->modName.'.php::'.$request->actName.'Action');
+				_connect('process',  $request->appName.'/'.$request->modName.'.php::'.$request->actName.'Action');
 				return;
 			}
 		}
