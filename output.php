@@ -68,17 +68,21 @@ class Metrofw_Output {
 	}
 
 	/**
-	 * Set the HTTP status header again if output buffering is on
 	 * Save any spark messages not unset by plugins
+	 *
+	 * If there were any errors during output, and headers have NOT been
+	 * sent yet, set the status header() again.
 	 */
 	public function hangup($response, $session) {
-		$this->statusHeader($response);
-
 		$msg  = $response->get('sparkmsg');
 		if (is_array($msg) && count($msg)) {
 			$sessionMsg  = (array)$session->get('sparkmsg');
 			$msg = array_merge($msg, $sessionMsg);
 			$session->set('sparkmsg', $msg);
+		}
+
+		if (!headers_sent()) {
+			$this->statusHeader($response);
 		}
 	}
 
