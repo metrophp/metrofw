@@ -8,6 +8,7 @@ class Metrofw_Template {
 	public $headTagList   = array();
 	public $baseDir       = '';
 	public $baseUri       = '';
+	public $fileExt       = '.html.php';
 
 
 	/**
@@ -47,6 +48,7 @@ class Metrofw_Template {
 		_set('template_name', $templateName);
 		$this->baseDir  = _get('template_basedir', 'local/templates/');
 		$this->baseUri  = _get('template_baseuri', 'local/templates/');
+		$this->fileExt  = _get('template_fileext', $this->fileExt);
 
 		_set('baseuri', $request->baseUri);
 
@@ -69,8 +71,8 @@ class Metrofw_Template {
 		}
 
 		//try special style, if not fall back to index
-		if (!@include( $this->baseDir. $templateName.'/'.$layout.'.html.php') ) {
-			if(@include($this->baseDir. $templateName.'/index.html.php')) {
+		if (!@include( $this->baseDir. $templateName.'/'.$layout.$this->fileExt) ) {
+			if(@include($this->baseDir. $templateName.'/index'.$this->fileExt)) {
 				$templateIncluded = TRUE;
 			}
 		} else {
@@ -80,10 +82,10 @@ class Metrofw_Template {
 		if (!$templateIncluded) {
 			$request->httpStatus = '501';
 			if ($request->isDevelopment()) {
-				throw new \Exception('Cannot include template '. $templateName.'/'.$layout.'.html.php');
+				throw new \Exception('Cannot include template '. $templateName.'/'.$layout.$this->fileExt);
 			}
 			$response->addTo('errors', 'Cannot include template '.$templateName.'.');
-			@include($this->baseDir. $templateName.'/server_error.html.php');
+			@include($this->baseDir. $templateName.'/server_error'.$this->fileExt);
 			return TRUE;
 		}
 	}
@@ -123,19 +125,16 @@ class Metrofw_Template {
 		}
 
 		//we don't have a section in the response
-		//let's include the template.main.file if the section is "main".
-		if ($sect != 'main') return;
+		//let's try to include templates/{template_name}/section/name.html.php
+		if ($sect != 'main') {
+			$this->includeSectionTemplate($response, $sect);
+			return;
+		}
 
-		$filesep = '/';
-		//$subsection = substr($args['template_section'], strpos($args['template_section'], '.')+1);
-		$subsection = substr($template_section, strpos($template_section, '.')+1);
-		$viewFile = _get('template.main.file', $request->modName.'_'.$request->actName).'.html.php';
-		$fileChoices = array();
-		$fileChoices[] = $this->baseDir._get('template_name').$filesep.'views'.$filesep.$request->appName.$filesep.$viewFile;
-		$fileChoices[] = 'src'  .
-				$filesep.$request->appName. $filesep . 'views'. $filesep . $viewFile;
-		$fileChoices[] = 'local'.
-				$filesep.$request->appName. $filesep . 'views'. $filesep . $viewFile;
+		//let's include the template.main.file if the section is "main".
+		$fileChoices = $this->_guessFileChoices($request);
+
+		extract($response->sectionList);
 
 		ob_start();
 		$success = FALSE;
@@ -149,11 +148,62 @@ class Metrofw_Template {
 		if (!$success) {
 			$errors = array();
 			$errors = _get('output_errors', $errors);
-			$errors[] = 'Cannot include view file. ' . $viewFile;
+			$errors[] = 'Cannot include view file. ' . $_f;
 			_set('output_errors', $errors);
-			_iCanHandle('template.main', 'metrofw/terrors.php');
 		}
 		echo ob_get_contents() . substr( ob_end_clean(), 0, 0);
+		return $success;
+	}
+
+	public function _guessFileChoices($request) {
+		$fileChoices = [];
+		$filesep     = '/';
+		$viewFile    = _get('template.main.file', '');
+		//leading slash indicates template file
+		if (substr($viewFile, 0, 1) ==  '/') {
+			$fileChoices[] = $this->baseDir._get('template_name').$viewFile;
+		} else {
+			//no override file, try to make some automatic guesses
+			if ($viewFile == '') {
+				//try src/app/views/actName.html.php
+				$viewFile = $request->modName.'_'.$request->actName.$this->fileExt;
+			}
+
+			$fileChoices[] = 'src'  .
+				$filesep.$request->appName. $filesep . 'views'. $filesep . $viewFile;
+
+			//try src/app/views/actName.html.php
+			$fileChoices[] = 'local'.
+				$filesep.$request->appName. $filesep . 'views'. $filesep . $viewFile;
+		}
+		return $fileChoices;
+	}
+
+	/**
+	 * Try to include template_path/section/name.html.php
+	 * where section/name comes from parseSection('template.section.name')
+	 */
+	public function includeSectionTemplate($response, $sect) {
+		//try templates/section/name.html.php
+		$fileChoices[] = $this->baseDir._get('template_name').str_replace('.', '/', $sect).$this->fileExt;
+		ob_start();
+
+		extract($response->sectionList);
+
+		$success = FALSE;
+		foreach ($fileChoices as $_f) {
+			if (include($_f)) {
+				$success = TRUE;
+				break;
+			}
+		}
+
+		if ($success) {
+			echo ob_get_contents();
+			exit();
+		}
+		ob_end_clean();
+		return $success;
 	}
 
 	public function transformContent($content, $request) {
@@ -199,6 +249,17 @@ class Metrofw_Template {
 		}
 		_set('template_section', $template_section);
 		$kernel->runLifecycle('template.'.$template_section);
+	}
+
+	public function e($var) {
+		return $this->escape($var);
+	}
+
+	public function escape($var) {
+		if (is_array($var) || is_object($var)) {
+			return;
+		}
+		return htmlspecialchars($var, ENT_QUOTES, 'UTF-8');
 	}
 }
 
