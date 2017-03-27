@@ -200,7 +200,6 @@ class Metrofw_Template {
 
 		if ($success) {
 			echo ob_get_contents();
-			exit();
 		}
 		ob_end_clean();
 		return $success;
