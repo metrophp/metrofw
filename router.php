@@ -190,6 +190,10 @@ class Metrofw_Router {
 			//if static part of pattern is longer, skip this pattern
 			if (count($listPat)-$optionalCount > count($listUrl)) continue;
 
+			//if the pattern has no optional parts, and the URL is longer than the pattern,
+			//this is not the pattern we're looking for
+			if ($optionalCount == 0 && (count($listUrl) > count($listPat))) continue;
+
 			foreach ($listPat as $_kPat => $_vPat) {
 				//colons represent optional parts of the URL pattern
 				//that set default values of request parameters
